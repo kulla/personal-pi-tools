@@ -12,6 +12,8 @@ pi install git:github.com/kulla/personal-pi-tools
 
 ### /commit
 
+Source: `extensions/commit/index.ts`
+
 Generates an editable conventional commit message from the current pi session and git diff, which can then be changed in an editor. After approving it, it commits all changes in the worktree with that message.
 
 Usage:
