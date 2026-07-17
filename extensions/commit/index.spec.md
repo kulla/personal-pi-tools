@@ -1,13 +1,11 @@
 # `/commit` extension
 
-**Implementation:** `extensions/commit/index.ts`  
-**Discovery:** `.pi/extensions` symlinks to `extensions/`.
+**Implementation:** `extensions/commit/index.ts`
 
 ## Purpose and usage
 
 `/commit` prepares a concise conventional-commit subject from the current pi
-session and repository state. It is available as a project-local command and
-should be run in a trusted repository with pending changes.
+session and repository state.
 
 ## Behavior
 
