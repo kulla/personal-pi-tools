@@ -1,5 +1,4 @@
-import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { complete } from '@earendil-works/pi-ai/compat'
 import type {
@@ -42,7 +41,7 @@ export default function (pi: ExtensionAPI) {
 
       notify(ctx, `Commit template ready: ${commitMessage}`, 'info')
 
-      const committed = await stageAndOpenCommitEditor(pi, ctx, commitMessage)
+      const committed = await stageAndCommit(pi, ctx, commitMessage)
       notify(
         ctx,
         committed ? 'Git commit completed.' : 'Git commit was not completed.',
@@ -159,53 +158,39 @@ async function askModel(
     .join('\n')
 }
 
-async function stageAndOpenCommitEditor(
+async function stageAndCommit(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
   commitMessage: string,
 ): Promise<boolean> {
-  const tempDir = await mkdtemp(join(tmpdir(), 'pi-commit-'))
-  const templatePath = join(tempDir, 'COMMIT_EDITMSG')
+  let finalCommitMessage = commitMessage
 
-  try {
-    const add = await git(pi, ctx, ['add', '-A'])
-    if (add.code !== 0) {
-      notify(
-        ctx,
-        `Failed to stage changes for commit: ${add.stderr.trim() || add.stdout.trim() || 'unknown error'}`,
-        'error',
-      )
+  if (ctx.hasUI) {
+    const edited = await ctx.ui.editor('Edit commit message', commitMessage)
+    if (edited === undefined) {
+      notify(ctx, 'Commit was cancelled.', 'warning')
       return false
     }
 
-    let finalCommitMessage = commitMessage
-    if (ctx.hasUI) {
-      const edited = await ctx.ui.editor('Edit commit message', commitMessage)
-      if (edited === undefined) {
-        notify(ctx, 'Commit was cancelled.', 'warning')
-        return false
-      }
-
-      finalCommitMessage = normalizeOneLine(edited)
-      if (!finalCommitMessage) {
-        notify(ctx, 'Commit message is empty.', 'warning')
-        return false
-      }
+    finalCommitMessage = normalizeOneLine(edited)
+    if (!finalCommitMessage) {
+      notify(ctx, 'Commit message is empty.', 'warning')
+      return false
     }
-
-    await writeFile(templatePath, `${finalCommitMessage}\n`, 'utf8')
-
-    const commit = await git(
-      pi,
-      ctx,
-      ctx.hasUI
-        ? ['commit', '-F', templatePath]
-        : ['commit', '--template', templatePath],
-    )
-    return commit.code === 0
-  } finally {
-    await rm(tempDir, { recursive: true, force: true }).catch(() => undefined)
   }
+
+  const add = await git(pi, ctx, ['add', '-A'])
+  if (add.code !== 0) {
+    notify(
+      ctx,
+      `Failed to stage changes for commit: ${add.stderr.trim() || add.stdout.trim() || 'unknown error'}`,
+      'error',
+    )
+    return false
+  }
+
+  const commit = await git(pi, ctx, ['commit', '-m', finalCommitMessage])
+  return commit.code === 0
 }
 
 async function getGitContext(
