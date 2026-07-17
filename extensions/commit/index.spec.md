@@ -83,4 +83,4 @@ The generated message should follow conventional commits, for example:
 ## Notes
 - Analyze only the current session and repository state.
 - The command should be available as a pi extension command named `/commit`.
-- The repo is linked into `.pi` via symlink so pi can discover the local extension.
+- `.pi/extensions` is a symlink to `extensions/` so pi can discover the local extension.
