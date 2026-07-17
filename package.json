@@ -2,6 +2,12 @@
   "name": "pi-tools",
   "type": "module",
   "private": true,
+  "scripts": {
+    "check": "bun run check:tsc && bun run check:format",
+    "check:format": "biome check --write",
+    "check:tsc": "tsc --noEmit",
+    "format": "biome format --write"
+  },
   "devDependencies": {
     "@biomejs/biome": "2.5.4",
     "@earendil-works/pi-ai": "^0.80.10",
