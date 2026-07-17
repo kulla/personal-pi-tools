@@ -3,6 +3,8 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@earendil-works/pi-ai": "^0.80.10",
+    "@earendil-works/pi-coding-agent": "^0.80.10",
     "typescript": "^7.0.2"
   }
 }
