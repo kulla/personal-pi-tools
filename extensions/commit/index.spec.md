@@ -1,86 +1,46 @@
-# /commit extension specification
+# `/commit` extension
 
-## Location
-- **Implementation file:** `extensions/commit/index.ts`
-- **Spec file:** `extensions/commit/index.spec.md`
-- This is a project-local extension.
+**Implementation:** `extensions/commit/index.ts`  
+**Discovery:** `.pi/extensions` symlinks to `extensions/`.
 
-## Purpose
-Provide a `/commit` command that prepares a conventional git commit message from the current pi session and repository state.
+## Purpose and usage
 
-## Usage
-- Run `/commit` in a trusted project with pending git changes.
+`/commit` prepares a concise conventional-commit subject from the current pi
+session and repository state. It is available as a project-local command and
+should be run in a trusted repository with pending changes.
 
 ## Behavior
-When `/commit` is invoked:
 
-1. **Read the last git commit time**
-   - Use git to get the timestamp of the most recent commit, e.g. `git log -1 --format=%ct`.
+On invocation:
 
-2. **Build context from the current session**
-   - First collect all AI **result messages** produced since that timestamp.
-   - Ask **gpt-4o-mini** to generate a conventional commit subject from that context.
-   - If the model replies that the context is not enough, include the related **user prompts** from the same time window and try again.
-   - If the session context is still insufficient, continue to the git-diff fallback.
+1. Stop if the current directory is not a git repository or has no changes.
+2. Get the latest commit timestamp (`git log -1 --format=%ct`). Consider only
+   pi session entries newer than that timestamp.
+3. Try these context candidates, in order:
+   1. all AI result messages;
+   2. those result messages plus related user prompts;
+   3. a git fallback containing `git status --porcelain`, staged and working-tree
+      `git diff`, and contents or summaries of untracked/new files.
+4. For each candidate, ask **gpt-4o-mini** through the pi SDK to produce a
+   conventional-commit subject. If it says the context is insufficient, try the
+   next candidate. If the model is unavailable or authentication fails, notify
+   the user and stop.
+5. Limit the combined git-fallback context (status, both diffs, and untracked
+   summaries) to 5,000 characters; when truncating, append a clear marker.
+6. On a valid one-line subject, run `git add -A`. If staging fails, notify the
+   user and stop. Invoke `git commit` with the generated subject as a template;
+   do not auto-commit or bypass user review—the commit must remain editable and
+   confirmable.
+7. If no candidate produces a subject, notify the user that one could not be
+   generated.
 
-3. **Fallback to git diff if needed**
-   - Use the repository diff as a second fallback.
-   - Include `git diff`, `git status --porcelain`, and the contents/summaries of any untracked/new files as needed.
-   - Truncate the total git diff-related context (`git status`, staged diff, working tree diff, and combined untracked-file summaries) to 5,000 characters.
-   - When truncation happens, append a clear truncation marker.
+The model must return either a conventional-commit message or an explicit
+“context is not enough” response. Analyze only the current session and current
+repository state.
 
-4. **Generate a commit message with ChatGPT 4o mini**
-   - Send each gathered context candidate to **gpt-4o-mini** via the pi SDK.
-   - If the model is unavailable or cannot be authenticated, notify the user and stop.
-   - The model must either return a **conventional commit** message or reply that the context is not enough.
-   - Keep the output concise and suitable for use as a commit template.
+## Output examples
 
-5. **Prepare the commit without auto-committing**
-   - Stage all new and changed files with `git add -A`.
-   - If staging fails, notify the user and stop.
-   - Invoke `git commit` using the generated message as a **template**.
-   - Do **not** bypass user review; the commit should remain editable/confirmable by the user.
-
-## Pseudo code
 ```text
-on /commit:
-  if not git repo: stop
-  if no changes: stop
-
-  lastCommitTime = get latest commit timestamp
-  session = pi session entries newer than lastCommitTime
-
-  contexts = [
-    assistant result messages from session,
-    assistant result messages + user prompts from session,
-    truncated git status / diff / untracked file summaries (max 5,000 characters),
-  ]
-
-  if model cannot be found or authenticated:
-    notify user and stop
-
-  for context in contexts:
-    model = get gpt-4o-mini model
-    if model is null:
-      notify user and stop
-    response = ask model to generate a conventional commit
-    if response means "context is not enough":
-      continue
-    if response is a valid one-line commit subject:
-      git add -A
-      if staging fails: notify user and stop
-      git commit --template <response>
-      stop
-
-  notify user that a commit message could not be generated
+feat(editor): improve cursor handling
+fix(toolbar): prevent duplicate actions
 ```
-
-## Output format
-The generated message should follow conventional commits, for example:
-- `feat(editor): improve cursor handling`
-- `fix(toolbar): prevent duplicate actions`
-
-## Notes
-- Analyze only the current session and repository state.
-- The command should be available as a pi extension command named `/commit`.
-- `.pi/extensions` is a symlink to `extensions/` so pi can discover the local extension.
