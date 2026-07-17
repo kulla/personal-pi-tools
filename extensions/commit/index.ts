@@ -10,6 +10,7 @@ import type {
 const GIT_SOURCE = 'git status, diffs, and untracked files'
 const INSUFFICIENT_CONTEXT_RESPONSE = 'CONTEXT_NOT_ENOUGH'
 const GIT_CONTEXT_TOTAL_MAX_CHARS = 5_000
+const AI_MESSAGE_LOG_MAX_CHARS = 1_500
 const UNTRACKED_FILE_LIMIT = 10
 const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400
 
@@ -58,10 +59,10 @@ async function generateCommitMessage(
   const contexts = await getCommitContexts(pi, ctx)
 
   for (const context of contexts) {
-    const message = await askModel(
-      ctx,
-      buildCommitPrompt(context.text, context.source),
-    )
+    const prompt = buildCommitPrompt(context.text, context.source)
+    traceAiMessage(ctx, 'Sent to AI', context.source, prompt)
+
+    const message = await askModel(ctx, prompt)
     const commitMessage = normalizeOneLine(message ?? '')
     if (!commitMessage) continue
     if (isContextNotEnough(commitMessage)) {
@@ -152,10 +153,13 @@ async function askModel(
     },
   )
 
-  return response.content
+  const answer = response.content
     .filter(isTextBlock)
     .map((part) => part.text)
     .join('\n')
+
+  traceAiMessage(ctx, 'AI answer', 'model response', answer)
+  return answer
 }
 
 async function stageAndCommit(
@@ -361,6 +365,19 @@ function section(title: string, body: string): string {
 function truncateText(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text
   return `${text.slice(0, maxChars)}\n...[truncated]`
+}
+
+function traceAiMessage(
+  ctx: ExtensionCommandContext,
+  label: string,
+  source: string,
+  message: string,
+) {
+  notify(
+    ctx,
+    `${label} (${source}):\n${truncateText(message, AI_MESSAGE_LOG_MAX_CHARS)}`,
+    'info',
+  )
 }
 
 function notify(
