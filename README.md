@@ -11,9 +11,11 @@ pi install git:github.com/kulla/personal-pi-tools
 ## Extensions
 
 ### /commit
-Generates an editable conventional commit message from the current pi session and git diff, then stages changes and opens the commit editor.
+
+Generates an editable conventional commit message from the current pi session and git diff, which can then be changed in an editor. After approving it, it commits all changes in the worktree with that message.
 
 Usage:
+
 ```text
 /commit
 ```
