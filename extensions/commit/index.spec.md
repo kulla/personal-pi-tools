@@ -19,7 +19,7 @@ On invocation:
    2. those result messages plus related user prompts;
    3. a git fallback containing `git status --porcelain`, staged and working-tree
       `git diff`, and contents or summaries of untracked/new files.
-4. For each candidate, ask **gpt-4o-mini** through the pi SDK to produce a
+4. For each candidate, ask the current model through the pi SDK to produce a
    conventional-commit subject. If it says the context is insufficient, try the
    next candidate. If the model is unavailable or authentication fails, notify
    the user and stop.
