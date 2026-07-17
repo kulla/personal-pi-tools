@@ -25,10 +25,10 @@ On invocation:
    the user and stop.
 5. Limit the combined git-fallback context (status, both diffs, and untracked
    summaries) to 5,000 characters; when truncating, append a clear marker.
-6. On a valid one-line subject, run `git add -A`. If staging fails, notify the
-   user and stop. Invoke `git commit` with the generated subject as a template;
-   do not auto-commit or bypass user review—the commit must remain editable and
-   confirmable.
+6. On a valid one-line subject, open `git commit` in the user’s editor with
+   the generated subject as the template so the user can review and change it.
+   Only if the commit message is accepted, run `git add -A`; if staging fails,
+   notify the user and stop. Then commit the staged changes.
 7. If no candidate produces a subject, notify the user that one could not be
    generated.
 
