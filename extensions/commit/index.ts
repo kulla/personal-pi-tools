@@ -85,8 +85,6 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
-      notify(ctx, `Commit template ready: ${commitMessage}`, "info");
-
       const committed = await stageAndCommit(pi, ctx, commitMessage);
       notify(
         ctx,
