@@ -6,6 +6,7 @@ import type {
   ExtensionCommandContext,
   SessionEntry,
 } from "@earendil-works/pi-coding-agent";
+import { Box, Text } from "@earendil-works/pi-tui";
 
 const GIT_SOURCE = "git status, diffs, and untracked files";
 const INSUFFICIENT_CONTEXT_RESPONSE = "CONTEXT_NOT_ENOUGH";
@@ -13,8 +14,52 @@ const GIT_CONTEXT_TOTAL_MAX_CHARS = 5_000;
 const AI_MESSAGE_LOG_MAX_CHARS = 1_500;
 const UNTRACKED_FILE_LIMIT = 10;
 const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400;
+const COMMIT_LLM_LOG_TYPE = "commit-llm-log";
+
+type CommitLlmLogData = {
+  source: string;
+  prompt: string;
+  timestamp: number;
+};
 
 export default function (pi: ExtensionAPI) {
+  pi.registerEntryRenderer<CommitLlmLogData>(
+    COMMIT_LLM_LOG_TYPE,
+    (entry, { expanded }, theme) => {
+      const data = entry.data ?? {
+        source: "unknown",
+        prompt: "",
+        timestamp: 0,
+      };
+      const box = new Box(1, 1, (text) => theme.bg("customMessageBg", text));
+      box.addChild(
+        new Text(
+          `${theme.fg("accent", "[commit prompt]")} ${theme.fg("muted", data.source)}`,
+          0,
+          0,
+        ),
+      );
+      box.addChild(
+        new Text(
+          theme.fg("dim", new Date(data.timestamp).toLocaleString()),
+          0,
+          0,
+        ),
+      );
+      box.addChild(
+        new Text(
+          theme.fg(
+            "text",
+            expanded ? data.prompt : truncateText(data.prompt, 500),
+          ),
+          0,
+          0,
+        ),
+      );
+      return box;
+    },
+  );
+
   pi.registerCommand("commit", {
     description: "Generate an editable conventional commit template",
     handler: async (_args, ctx) => {
@@ -61,6 +106,7 @@ async function generateCommitMessage(
   for (const context of contexts) {
     const prompt = buildCommitPrompt(context.text, context.source);
     traceAiMessage(ctx, "Sent to AI", context.source, prompt);
+    appendLlmPromptLog(pi, context.source, prompt);
 
     const message = await askModel(ctx, prompt);
     const commitMessage = normalizeOneLine(message ?? "");
@@ -365,6 +411,14 @@ function section(title: string, body: string): string {
 function truncateText(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text;
   return `${text.slice(0, maxChars)}\n...[truncated]`;
+}
+
+function appendLlmPromptLog(pi: ExtensionAPI, source: string, prompt: string) {
+  pi.appendEntry(COMMIT_LLM_LOG_TYPE, {
+    source,
+    prompt,
+    timestamp: Date.now(),
+  });
 }
 
 function traceAiMessage(
