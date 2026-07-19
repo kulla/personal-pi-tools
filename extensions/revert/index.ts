@@ -2,7 +2,7 @@ import type {
   ExtensionAPI,
   ExtensionCommandContext,
 } from "@earendil-works/pi-coding-agent";
-import { createLogger } from "../../utils/logging.ts";
+import { createLogger, type Logger } from "../../utils/logging.ts";
 
 export default function (pi: ExtensionAPI) {
   const logger = createLogger(pi);
@@ -12,28 +12,36 @@ export default function (pi: ExtensionAPI) {
       "Stash changes and rewind to the first entry after the last commit",
     handler: async (_args, ctx) => {
       try {
-        abortCurrentTurn(ctx);
-        await ctx.waitForIdle();
-
-        await requireGitRepository(pi, ctx);
-        await stashChanges(pi, ctx);
-        const commitTime = await getLastCommitTime(pi, ctx);
-        const entry = findFirstEntryAfterCommit(ctx, commitTime);
-
-        if (!entry) {
-          logger.log("There is nothing to rewind.", "info");
-          return;
-        }
-
-        const result = await ctx.navigateTree(entry.id, { summarize: false });
-        if (result.cancelled) {
-          throw new Error("Revert navigation was cancelled.");
-        }
+        await rewindSession(pi, ctx, logger);
       } catch (error) {
         logger.log(getRevertErrorMessage(error), "error");
       }
     },
   });
+}
+
+async function rewindSession(
+  pi: ExtensionAPI,
+  ctx: ExtensionCommandContext,
+  logger: Logger,
+): Promise<void> {
+  abortCurrentTurn(ctx);
+  await ctx.waitForIdle();
+
+  await requireGitRepository(pi, ctx);
+  await stashChanges(pi, ctx);
+  const commitTime = await getLastCommitTime(pi, ctx);
+  const entry = findFirstEntryAfterCommit(ctx, commitTime);
+
+  if (!entry) {
+    logger.log("There is nothing to rewind.", "info");
+    return;
+  }
+
+  const result = await ctx.navigateTree(entry.id, { summarize: false });
+  if (result.cancelled) {
+    throw new Error("Revert navigation was cancelled.");
+  }
 }
 
 function abortCurrentTurn(ctx: ExtensionCommandContext): void {
