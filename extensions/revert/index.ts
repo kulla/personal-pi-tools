@@ -2,7 +2,9 @@ import type {
   ExtensionAPI,
   ExtensionCommandContext,
 } from "@earendil-works/pi-coding-agent";
+import { getErrorMessage } from "../../utils/errors.ts";
 import { createLogger, type Logger } from "../../utils/logging.ts";
+import { abortCurrentTurn } from "../../utils/session.ts";
 
 export default function (pi: ExtensionAPI) {
   const logger = createLogger(pi);
@@ -14,7 +16,10 @@ export default function (pi: ExtensionAPI) {
       try {
         await rewindSession(pi, ctx, logger);
       } catch (error) {
-        logger.log(getRevertErrorMessage(error), "error");
+        logger.log(
+          getErrorMessage(error, "Unable to revert the current workflow."),
+          "error",
+        );
       }
     },
   });
@@ -41,12 +46,6 @@ async function rewindSession(
   const result = await ctx.navigateTree(entry.id, { summarize: false });
   if (result.cancelled) {
     throw new Error("Revert navigation was cancelled.");
-  }
-}
-
-function abortCurrentTurn(ctx: ExtensionCommandContext): void {
-  if (!ctx.isIdle()) {
-    ctx.abort();
   }
 }
 
@@ -112,10 +111,4 @@ function getEntryTime(entry: { timestamp: string }): number {
 
 function git(pi: ExtensionAPI, ctx: ExtensionCommandContext, args: string[]) {
   return pi.exec("git", args, { cwd: ctx.cwd, signal: ctx.signal });
-}
-
-function getRevertErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "Unable to revert the current workflow.";
 }

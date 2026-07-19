@@ -1,8 +1,7 @@
-import type {
-  ExtensionAPI,
-  ExtensionCommandContext,
-} from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { getErrorMessage } from "../../utils/errors.ts";
 import { createLogger } from "../../utils/logging.ts";
+import { abortCurrentTurn } from "../../utils/session.ts";
 
 export default function (pi: ExtensionAPI) {
   const logger = createLogger(pi);
@@ -14,20 +13,11 @@ export default function (pi: ExtensionAPI) {
         abortCurrentTurn(ctx);
         await ctx.waitForIdle();
       } catch (error) {
-        logger.log(getUndoErrorMessage(error), "error");
+        logger.log(
+          getErrorMessage(error, "Unable to undo the current turn."),
+          "error",
+        );
       }
     },
   });
-}
-
-function abortCurrentTurn(ctx: ExtensionCommandContext): void {
-  if (!ctx.isIdle()) {
-    ctx.abort();
-  }
-}
-
-function getUndoErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "Unable to undo the current turn.";
 }
