@@ -43,11 +43,7 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
-      const committed = await stageAndCommit(pi, ctx, commitMessage, logger);
-      logger.log(
-        committed ? "Git commit completed." : "Git commit was not completed.",
-        committed ? "info" : "warning",
-      );
+      await stageAndCommit(pi, ctx, commitMessage, logger);
     },
   });
 }
@@ -170,20 +166,20 @@ async function stageAndCommit(
   ctx: ExtensionCommandContext,
   commitMessage: string,
   logger: Logger,
-): Promise<boolean> {
+): Promise<void> {
   let finalCommitMessage = commitMessage;
 
   if (ctx.hasUI) {
     const edited = await ctx.ui.editor("Edit commit message", commitMessage);
     if (edited === undefined) {
       logger.log("Commit was cancelled.", "warning");
-      return false;
+      return;
     }
 
     finalCommitMessage = normalizeOneLine(edited);
     if (!finalCommitMessage) {
       logger.log("Commit message is empty.", "warning");
-      return false;
+      return;
     }
   }
 
@@ -193,11 +189,15 @@ async function stageAndCommit(
       `Failed to stage changes for commit: ${add.stderr.trim() || add.stdout.trim() || "unknown error"}`,
       "error",
     );
-    return false;
+    return;
   }
 
   const commit = await git(pi, ctx, ["commit", "-m", finalCommitMessage]);
-  return commit.code === 0;
+  if (commit.code === 0) {
+    logger.log("Git commit commpleted");
+  } else {
+    logger.log("Error in running git commit.", "error");
+  }
 }
 
 async function getGitContext(
