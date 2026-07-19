@@ -162,10 +162,6 @@ async function askModel(
     .map((part) => part.text)
     .join("\n");
 
-  logger.log(
-    `AI answer (model response):\n${truncateText(answer, AI_MESSAGE_LOG_MAX_CHARS)}`,
-    "info",
-  );
   return answer;
 }
 
