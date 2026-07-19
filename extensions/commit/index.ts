@@ -58,7 +58,7 @@ async function generateCommitMessage(
   for (const context of contexts) {
     const prompt = buildCommitPrompt(context.text, context.source);
     logger.log(
-      `Sent to AI (${context.source}):\n${truncateText(prompt, AI_MESSAGE_LOG_MAX_CHARS)}`,
+      `Sent context to AI (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
       "info",
     );
     const message = await askModel(ctx, prompt, logger);
