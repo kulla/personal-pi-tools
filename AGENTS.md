@@ -5,4 +5,4 @@
 - Keep each colocated `spec.md` synchronized with implementation changes.
 - Validate TypeScript by invoking local tools directly:
   - `./node_modules/.bin/tsc --noEmit`
-  - `./node_modules/.bin/biome check .`
+  - `./node_modules/.bin/biome format .`
