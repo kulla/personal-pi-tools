@@ -4,10 +4,9 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { createLogger } from "../../utils/logging.ts";
 
-const UNDO_LOG_TYPE = "undo-log";
 
 export default function (pi: ExtensionAPI) {
-  const logger = createLogger(pi, UNDO_LOG_TYPE);
+  const logger = createLogger(pi);
 
   pi.registerCommand("undo", {
     description: "Abort the current turn and rewind to the previous prompt",

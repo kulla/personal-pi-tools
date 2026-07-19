@@ -14,10 +14,9 @@ const GIT_CONTEXT_TOTAL_MAX_CHARS = 5_000;
 const AI_MESSAGE_LOG_MAX_CHARS = 500;
 const UNTRACKED_FILE_LIMIT = 10;
 const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400;
-const COMMIT_LOG_TYPE = "commit-log";
 
 export default function (pi: ExtensionAPI) {
-  const logger = createLogger(pi, COMMIT_LOG_TYPE);
+  const logger = createLogger(pi);
 
   pi.registerCommand("commit", {
     description: "Generate an editable conventional commit template",

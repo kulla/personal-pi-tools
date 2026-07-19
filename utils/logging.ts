@@ -1,6 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
 
+const LOG_TYPE = "log-message";
+
 export type LogLevel = "info" | "warning" | "error";
 
 export type LogEntryData = {
@@ -12,13 +14,9 @@ export type Logger = {
   log: (message: string, level?: LogLevel) => void;
 };
 
-export function createLogger(
-  pi: ExtensionAPI,
-  entryType: string,
-  maxChars = 500,
-): Logger {
+export function createLogger(pi: ExtensionAPI, maxChars = 500): Logger {
   pi.registerEntryRenderer<LogEntryData>(
-    entryType,
+    LOG_TYPE,
     (entry, { expanded }, theme) => {
       const data = entry.data ?? { level: "info", message: "" };
       const color =
@@ -37,7 +35,7 @@ export function createLogger(
 
   return {
     log(message: string, level: LogLevel = "info") {
-      pi.appendEntry(entryType, { level, message });
+      pi.appendEntry(LOG_TYPE, { level, message });
     },
   };
 }
