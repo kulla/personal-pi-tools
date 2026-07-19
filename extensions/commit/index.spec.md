@@ -15,8 +15,8 @@ On invocation:
 2. Get the latest commit timestamp (`git log -1 --format=%ct`). Consider only
    pi session entries newer than that timestamp.
 3. Try these context candidates, in order:
-   1. all AI result messages;
-   2. those result messages plus related user prompts;
+   1. all user prompts;
+   2. those user prompts plus related AI result messages;
    3. a git fallback containing `git status --porcelain`, staged and working-tree
       `git diff`, and contents or summaries of untracked/new files.
 4. For each candidate, ask the current model through the pi SDK to produce a

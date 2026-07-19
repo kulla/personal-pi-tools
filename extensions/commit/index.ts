@@ -87,17 +87,17 @@ async function getCommitContexts(
   const prompts = entries.filter(isUserMessage);
   const contexts: { text: string; source: string }[] = [];
 
-  const resultText = renderTranscript(results);
-  if (resultText) {
-    contexts.push({ text: resultText, source: "session result messages" });
+  const promptText = renderTranscript(prompts);
+  if (promptText) {
+    contexts.push({ text: promptText, source: "session user prompts" });
   }
 
-  if (prompts.length > 0) {
-    const sessionText = renderTranscript([...results, ...prompts].sort(byTime));
-    if (sessionText && sessionText !== resultText) {
+  if (results.length > 0) {
+    const sessionText = renderTranscript([...prompts, ...results].sort(byTime));
+    if (sessionText && sessionText !== promptText) {
       contexts.push({
         text: sessionText,
-        source: "session result messages and user prompts",
+        source: "session user prompts and result messages",
       });
     }
   }
