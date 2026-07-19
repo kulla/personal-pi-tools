@@ -26,7 +26,7 @@ export function createLogger(
           ? "error"
           : data.level === "warning"
             ? "warning"
-            : "accent";
+            : "dim";
       const message = expanded
         ? data.message
         : truncateText(data.message, maxChars);
