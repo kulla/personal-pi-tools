@@ -7,7 +7,9 @@ import type {
   SessionEntry,
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
+import { git, gitText } from "../../utils/git.ts";
 import { createLogger, type Logger } from "../../utils/logging.ts";
+import { getEntryTime } from "../../utils/session.ts";
 
 const GIT_SOURCE = "git status, diffs, and untracked files";
 const INSUFFICIENT_CONTEXT_RESPONSE = "CONTEXT_NOT_ENOUGH";
@@ -296,19 +298,6 @@ async function getLastCommitTime(
   return Number.isFinite(seconds) ? seconds * 1000 : 0;
 }
 
-async function gitText(
-  pi: ExtensionAPI,
-  ctx: ExtensionCommandContext,
-  args: string[],
-): Promise<string> {
-  const result = await git(pi, ctx, args);
-  return result.code === 0 ? result.stdout.trim() : "";
-}
-
-function git(pi: ExtensionAPI, ctx: ExtensionCommandContext, args: string[]) {
-  return pi.exec("git", args, { cwd: ctx.cwd, signal: ctx.signal });
-}
-
 function renderTranscript(entries: SessionEntry[]): string {
   return entries.map(renderEntry).filter(Boolean).join("\n\n");
 }
@@ -370,11 +359,6 @@ function truncateText(text: string, maxChars: number): string {
 
 function byTime(a: SessionEntry, b: SessionEntry): number {
   return getEntryTime(a) - getEntryTime(b);
-}
-
-function getEntryTime(entry: SessionEntry): number {
-  const time = new Date(entry.timestamp).getTime();
-  return Number.isFinite(time) ? time : 0;
 }
 
 type UserOrAssistantEntry = SessionEntry & {
