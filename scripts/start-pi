@@ -1,3 +1,5 @@
 #!/bin/bash
 
-nono run --allow . --profile pi -- pi
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+nono run --allow "$ROOT_DIR" --profile pi -- pi
