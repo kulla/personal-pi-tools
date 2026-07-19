@@ -31,7 +31,7 @@ export function createLogger(
         ? data.message
         : truncateText(data.message, maxChars);
 
-      return new Text(theme.fg(color, message), 0, 0);
+      return new Text(theme.fg(color, message), 1, 0);
     },
   );
 
