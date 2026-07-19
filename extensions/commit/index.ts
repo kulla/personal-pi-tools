@@ -22,8 +22,6 @@ export default function (pi: ExtensionAPI) {
   pi.registerCommand("commit", {
     description: "Generate an editable conventional commit template",
     handler: async (_args, ctx) => {
-      logger.log("Preparing commit template...", "info");
-
       if (!(await isGitRepo(pi, ctx))) {
         logger.log("Not inside a git repository.", "error");
         return;
@@ -58,7 +56,7 @@ async function generateCommitMessage(
   for (const context of contexts) {
     const prompt = buildCommitPrompt(context.text, context.source);
     logger.log(
-      `Sent context to AI (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
+      `Generate commit (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
       "info",
     );
     const message = await askModel(ctx, prompt, logger);
