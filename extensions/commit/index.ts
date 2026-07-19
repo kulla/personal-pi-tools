@@ -11,7 +11,7 @@ import { createLogger, type Logger } from "../../utils/logging.ts";
 const GIT_SOURCE = "git status, diffs, and untracked files";
 const INSUFFICIENT_CONTEXT_RESPONSE = "CONTEXT_NOT_ENOUGH";
 const GIT_CONTEXT_TOTAL_MAX_CHARS = 5_000;
-const AI_MESSAGE_LOG_MAX_CHARS = 1_500;
+const AI_MESSAGE_LOG_MAX_CHARS = 500;
 const UNTRACKED_FILE_LIMIT = 10;
 const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400;
 const COMMIT_LOG_TYPE = "commit-log";
