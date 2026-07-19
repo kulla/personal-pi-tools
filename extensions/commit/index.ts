@@ -56,15 +56,15 @@ export default function (pi: ExtensionAPI) {
   pi.registerCommand("commit", {
     description: "Generate an editable conventional commit template",
     handler: async (_args, ctx) => {
-      log(pi, ctx, "Preparing commit template...", "info");
+      log(pi, "Preparing commit template...", "info");
 
       if (!(await isGitRepo(pi, ctx))) {
-        log(pi, ctx, "Not inside a git repository.", "error");
+        log(pi, "Not inside a git repository.", "error");
         return;
       }
 
       if (!(await hasChanges(pi, ctx))) {
-        log(pi, ctx, "No changes to commit.", "warning");
+        log(pi, "No changes to commit.", "warning");
         return;
       }
 
@@ -72,7 +72,6 @@ export default function (pi: ExtensionAPI) {
       if (!commitMessage) {
         log(
           pi,
-          ctx,
           `Unable to generate a commit message with the active model.`,
           "error",
         );
@@ -82,7 +81,6 @@ export default function (pi: ExtensionAPI) {
       const committed = await stageAndCommit(pi, ctx, commitMessage);
       log(
         pi,
-        ctx,
         committed ? "Git commit completed." : "Git commit was not completed.",
         committed ? "info" : "warning",
       );
@@ -100,7 +98,6 @@ async function generateCommitMessage(
     const prompt = buildCommitPrompt(context.text, context.source);
     log(
       pi,
-      ctx,
       `Sent to AI (${context.source}):\n${truncateText(prompt, AI_MESSAGE_LOG_MAX_CHARS)}`,
       "info",
     );
@@ -167,13 +164,13 @@ async function askModel(
 ): Promise<string | null> {
   const model = ctx.model;
   if (!model) {
-    log(pi, ctx, "No active model is available.", "error");
+    log(pi, "No active model is available.", "error");
     return null;
   }
 
   const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
   if (!auth.ok || !auth.apiKey) {
-    log(pi, ctx, "Unable to authenticate the active model.", "error");
+    log(pi, "Unable to authenticate the active model.", "error");
     return null;
   }
 
@@ -203,7 +200,6 @@ async function askModel(
 
   log(
     pi,
-    ctx,
     `AI answer (model response):\n${truncateText(answer, AI_MESSAGE_LOG_MAX_CHARS)}`,
     "info",
   );
@@ -220,13 +216,13 @@ async function stageAndCommit(
   if (ctx.hasUI) {
     const edited = await ctx.ui.editor("Edit commit message", commitMessage);
     if (edited === undefined) {
-      log(pi, ctx, "Commit was cancelled.", "warning");
+      log(pi, "Commit was cancelled.", "warning");
       return false;
     }
 
     finalCommitMessage = normalizeOneLine(edited);
     if (!finalCommitMessage) {
-      log(pi, ctx, "Commit message is empty.", "warning");
+      log(pi, "Commit message is empty.", "warning");
       return false;
     }
   }
@@ -235,7 +231,6 @@ async function stageAndCommit(
   if (add.code !== 0) {
     log(
       pi,
-      ctx,
       `Failed to stage changes for commit: ${add.stderr.trim() || add.stdout.trim() || "unknown error"}`,
       "error",
     );
@@ -418,7 +413,6 @@ function truncateText(text: string, maxChars: number): string {
 
 function log(
   pi: ExtensionAPI,
-  ctx: ExtensionCommandContext,
   message: string,
   level: "info" | "warning" | "error",
 ) {
@@ -426,8 +420,6 @@ function log(
     level,
     message,
   });
-
-  if (ctx.hasUI) ctx.ui.notify(message, level);
 }
 
 function byTime(a: SessionEntry, b: SessionEntry): number {
