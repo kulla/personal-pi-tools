@@ -19,8 +19,12 @@ On invocation:
    2. those user prompts plus related AI result messages;
    3. a git fallback containing `git status --porcelain`, staged and working-tree
       `git diff`, and contents or summaries of untracked/new files.
-4. For each candidate, ask the current model through the pi SDK to produce a
-   conventional-commit subject. Before and after each request, show a log entry
+4. Before asking the AI, temporarily switch to
+   `openai-codex/gpt-5.4-mini` (the equivalent of `/model openai-codex/gpt-5.4-mini`),
+   saving the previously active model. For each candidate, ask that model through
+   the pi SDK to produce a conventional-commit subject. Restore the saved model
+   after generation completes, including when an AI request throws or fails.
+   Before and after each request, show a log entry
    with the prompt sent to the AI and the answer received. Log entries render
    as plain message text without a level prefix or background, using accent,
    warning, or error colors. If the model says the context is insufficient, try

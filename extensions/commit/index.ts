@@ -17,6 +17,8 @@ const GIT_CONTEXT_TOTAL_MAX_CHARS = 5_000;
 const AI_MESSAGE_LOG_MAX_CHARS = 500;
 const UNTRACKED_FILE_LIMIT = 10;
 const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400;
+const COMMIT_MODEL_PROVIDER = "openai-codex";
+const COMMIT_MODEL_ID = "gpt-5.4-mini";
 
 export default function (pi: ExtensionAPI) {
   const logger = createLogger(pi);
@@ -54,24 +56,62 @@ async function generateCommitMessage(
   logger: Logger,
 ): Promise<string | null> {
   const contexts = await getCommitContexts(pi, ctx);
-
-  for (const context of contexts) {
-    const prompt = buildCommitPrompt(context.text, context.source);
-    logger.log(
-      `Generate commit (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
-      "info",
-    );
-    const message = await askModel(ctx, prompt, logger);
-    const commitMessage = normalizeOneLine(message ?? "");
-    if (!commitMessage) continue;
-    if (isContextNotEnough(commitMessage)) {
-      continue;
-    }
-
-    return commitMessage;
+  const previousModel = ctx.model;
+  if (!previousModel) {
+    logger.log("No active model is available.", "error");
+    return null;
   }
 
-  return null;
+  const commitModel = ctx.modelRegistry.find(
+    COMMIT_MODEL_PROVIDER,
+    COMMIT_MODEL_ID,
+  );
+  if (!commitModel) {
+    logger.log(
+      `Commit model ${COMMIT_MODEL_PROVIDER}/${COMMIT_MODEL_ID} is not available.`,
+      "error",
+    );
+    return null;
+  }
+
+  try {
+    if (!(await pi.setModel(commitModel))) {
+      logger.log(
+        `Unable to authenticate commit model ${COMMIT_MODEL_PROVIDER}/${COMMIT_MODEL_ID}.`,
+        "error",
+      );
+      return null;
+    }
+
+    for (const context of contexts) {
+      const prompt = buildCommitPrompt(context.text, context.source);
+      logger.log(
+        `Generate commit (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
+        "info",
+      );
+      const message = await askModel(ctx, prompt, logger);
+      const commitMessage = normalizeOneLine(message ?? "");
+      if (!commitMessage) continue;
+      if (isContextNotEnough(commitMessage)) {
+        continue;
+      }
+
+      return commitMessage;
+    }
+
+    return null;
+  } finally {
+    try {
+      if (!(await pi.setModel(previousModel))) {
+        logger.log("Unable to restore the previously active model.", "error");
+      }
+    } catch (error) {
+      logger.log(
+        `Unable to restore the previously active model: ${getErrorMessage(error, "unknown error")}`,
+        "error",
+      );
+    }
+  }
 }
 
 async function getCommitContexts(
