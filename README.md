@@ -21,3 +21,18 @@ Usage:
 ```text
 /commit
 ```
+
+## Utilities
+
+### `utils/logging.ts`
+
+Reusable log-entry renderer/helper for extensions.
+
+Usage:
+
+```ts
+import { createLogger } from "./utils/logging.ts";
+
+const logger = createLogger(pi, "my-log");
+logger.log("Hello", "info");
+```

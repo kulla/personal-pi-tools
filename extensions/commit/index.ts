@@ -6,7 +6,7 @@ import type {
   ExtensionCommandContext,
   SessionEntry,
 } from "@earendil-works/pi-coding-agent";
-import { Box, Text } from "@earendil-works/pi-tui";
+import { createLogger, type Logger } from "../../utils/logging.ts";
 
 const GIT_SOURCE = "git status, diffs, and untracked files";
 const INSUFFICIENT_CONTEXT_RESPONSE = "CONTEXT_NOT_ENOUGH";
@@ -16,71 +16,35 @@ const UNTRACKED_FILE_LIMIT = 10;
 const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400;
 const COMMIT_LOG_TYPE = "commit-log";
 
-type CommitLogData = {
-  level: "info" | "warning" | "error";
-  message: string;
-};
-
 export default function (pi: ExtensionAPI) {
-  pi.registerEntryRenderer<CommitLogData>(
-    COMMIT_LOG_TYPE,
-    (entry, { expanded }, theme) => {
-      const data = entry.data ?? {
-        level: "info",
-        message: "",
-      };
-      const box = new Box(1, 1, (text) => theme.bg("customMessageBg", text));
-      const levelColor =
-        data.level === "error"
-          ? "error"
-          : data.level === "warning"
-            ? "warning"
-            : "accent";
-      box.addChild(
-        new Text(theme.fg(levelColor, `[commit ${data.level}]`), 0, 0),
-      );
-      box.addChild(
-        new Text(
-          theme.fg(
-            "text",
-            expanded ? data.message : truncateText(data.message, 500),
-          ),
-          0,
-          0,
-        ),
-      );
-      return box;
-    },
-  );
+  const logger = createLogger(pi, COMMIT_LOG_TYPE);
 
   pi.registerCommand("commit", {
     description: "Generate an editable conventional commit template",
     handler: async (_args, ctx) => {
-      log(pi, "Preparing commit template...", "info");
+      logger.log("Preparing commit template...", "info");
 
       if (!(await isGitRepo(pi, ctx))) {
-        log(pi, "Not inside a git repository.", "error");
+        logger.log("Not inside a git repository.", "error");
         return;
       }
 
       if (!(await hasChanges(pi, ctx))) {
-        log(pi, "No changes to commit.", "warning");
+        logger.log("No changes to commit.", "warning");
         return;
       }
 
-      const commitMessage = await generateCommitMessage(pi, ctx);
+      const commitMessage = await generateCommitMessage(pi, ctx, logger);
       if (!commitMessage) {
-        log(
-          pi,
+        logger.log(
           `Unable to generate a commit message with the active model.`,
           "error",
         );
         return;
       }
 
-      const committed = await stageAndCommit(pi, ctx, commitMessage);
-      log(
-        pi,
+      const committed = await stageAndCommit(pi, ctx, commitMessage, logger);
+      logger.log(
         committed ? "Git commit completed." : "Git commit was not completed.",
         committed ? "info" : "warning",
       );
@@ -91,17 +55,17 @@ export default function (pi: ExtensionAPI) {
 async function generateCommitMessage(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
+  logger: Logger,
 ): Promise<string | null> {
   const contexts = await getCommitContexts(pi, ctx);
 
   for (const context of contexts) {
     const prompt = buildCommitPrompt(context.text, context.source);
-    log(
-      pi,
+    logger.log(
       `Sent to AI (${context.source}):\n${truncateText(prompt, AI_MESSAGE_LOG_MAX_CHARS)}`,
       "info",
     );
-    const message = await askModel(pi, ctx, prompt);
+    const message = await askModel(ctx, prompt, logger);
     const commitMessage = normalizeOneLine(message ?? "");
     if (!commitMessage) continue;
     if (isContextNotEnough(commitMessage)) {
@@ -158,19 +122,19 @@ function isContextNotEnough(text: string): boolean {
 }
 
 async function askModel(
-  pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
   prompt: string,
+  logger: Logger,
 ): Promise<string | null> {
   const model = ctx.model;
   if (!model) {
-    log(pi, "No active model is available.", "error");
+    logger.log("No active model is available.", "error");
     return null;
   }
 
   const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
   if (!auth.ok || !auth.apiKey) {
-    log(pi, "Unable to authenticate the active model.", "error");
+    logger.log("Unable to authenticate the active model.", "error");
     return null;
   }
 
@@ -198,8 +162,7 @@ async function askModel(
     .map((part) => part.text)
     .join("\n");
 
-  log(
-    pi,
+  logger.log(
     `AI answer (model response):\n${truncateText(answer, AI_MESSAGE_LOG_MAX_CHARS)}`,
     "info",
   );
@@ -210,27 +173,27 @@ async function stageAndCommit(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
   commitMessage: string,
+  logger: Logger,
 ): Promise<boolean> {
   let finalCommitMessage = commitMessage;
 
   if (ctx.hasUI) {
     const edited = await ctx.ui.editor("Edit commit message", commitMessage);
     if (edited === undefined) {
-      log(pi, "Commit was cancelled.", "warning");
+      logger.log("Commit was cancelled.", "warning");
       return false;
     }
 
     finalCommitMessage = normalizeOneLine(edited);
     if (!finalCommitMessage) {
-      log(pi, "Commit message is empty.", "warning");
+      logger.log("Commit message is empty.", "warning");
       return false;
     }
   }
 
   const add = await git(pi, ctx, ["add", "-A"]);
   if (add.code !== 0) {
-    log(
-      pi,
+    logger.log(
       `Failed to stage changes for commit: ${add.stderr.trim() || add.stdout.trim() || "unknown error"}`,
       "error",
     );
@@ -409,17 +372,6 @@ function section(title: string, body: string): string {
 function truncateText(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text;
   return `${text.slice(0, maxChars)}\n...[truncated]`;
-}
-
-function log(
-  pi: ExtensionAPI,
-  message: string,
-  level: "info" | "warning" | "error",
-) {
-  pi.appendEntry(COMMIT_LOG_TYPE, {
-    level,
-    message,
-  });
 }
 
 function byTime(a: SessionEntry, b: SessionEntry): number {

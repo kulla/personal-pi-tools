@@ -20,10 +20,12 @@ On invocation:
    3. a git fallback containing `git status --porcelain`, staged and working-tree
       `git diff`, and contents or summaries of untracked/new files.
 4. For each candidate, ask the current model through the pi SDK to produce a
-   conventional-commit subject. Before and after each request, show an info
-   notification with the prompt sent to the AI and the answer received. If the
-   model says the context is insufficient, try the next candidate. If the model
-   is unavailable or authentication fails, notify the user and stop.
+   conventional-commit subject. Before and after each request, show a log entry
+   with the prompt sent to the AI and the answer received. Log entries render
+   as plain message text without a level prefix or background, using accent,
+   warning, or error colors. If the model says the context is insufficient, try
+   the next candidate. If the model is unavailable or authentication fails,
+   notify the user and stop.
 5. Limit the combined git-fallback context (status, both diffs, and untracked
    summaries) to 5,000 characters; when truncating, append a clear marker.
 6. On a valid one-line subject, open `git commit` in the user’s editor with
