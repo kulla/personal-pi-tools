@@ -31,10 +31,18 @@ Use this checklist before changing code and before replying.
 - Simple is not naive: keep validation, error handling, and right data structures.
 - Simple is not primitive: use a well-chosen library or pattern when it reduces code.
 - Avoid clever one-liners, deep generics, factory chains, god functions, and hidden control flow.
-- YAGNI: build only what is needed now.
+- YAGNI: solve today's requirement; refactor when real requirements appear.
 - DRY: avoid repeated logic, but allow small duplication if it is clearer than abstraction.
 - SRP: each module/function should have one clear responsibility.
 - Prefer composition over inheritance.
+
+## YAGNI Checks
+- Do not add features, config, parameters, flags, columns, caches, services, or plugin systems "just in case".
+- Prefer direct code for one use case; abstract after repeated real use, not before.
+- Avoid interfaces/base classes with one implementation unless the project already requires them.
+- Remove unused code paths and options; they still need tests, maintenance, and debugging.
+- Duplication can be cheaper than the wrong abstraction; wait until the pattern is clear.
+- YAGNI does not excuse weak structure, missing error handling, or ignoring known production failures.
 
 ## Verify
 - Review the diff against the request.
