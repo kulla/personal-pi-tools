@@ -1,7 +1,4 @@
-# AGENTS.md
-
 - Personal pi tools package: make small, focused changes; avoid generic scaffolding.
-- Keep code simple and readable (KISS). Surface errors; never fail silently.
 - Keep each colocated `spec.md` synchronized with implementation changes.
 - Validate TypeScript by invoking local tools directly:
   - `./node_modules/.bin/tsc --noEmit`
