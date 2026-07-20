@@ -36,8 +36,8 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
-      const commitMessage = await generateCommitMessage(pi, ctx, logger);
-      if (!commitMessage) {
+      const commitDraft = await generateCommitMessage(pi, ctx, logger);
+      if (!commitDraft) {
         logger.log(
           `Unable to generate a commit message with the active model.`,
           "error",
@@ -45,7 +45,7 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
-      await stageAndCommit(pi, ctx, commitMessage, logger);
+      await stageAndCommit(pi, ctx, commitDraft, logger);
     },
   });
 }
@@ -54,8 +54,8 @@ async function generateCommitMessage(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
   logger: Logger,
-): Promise<string | null> {
-  const contexts = await getCommitContexts(pi, ctx);
+): Promise<{ subject: string; assistedBy?: string } | null> {
+  const { contexts, hasUserMessages } = await getCommitContexts(pi, ctx);
   const previousModel = ctx.model;
   if (!previousModel) {
     logger.log("No active model is available.", "error");
@@ -96,7 +96,10 @@ async function generateCommitMessage(
         continue;
       }
 
-      return commitMessage;
+      return {
+        subject: commitMessage,
+        assistedBy: hasUserMessages ? formatModelRef(previousModel) : undefined,
+      };
     }
 
     return null;
@@ -117,7 +120,10 @@ async function generateCommitMessage(
 async function getCommitContexts(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
-): Promise<{ text: string; source: string }[]> {
+): Promise<{
+  contexts: { text: string; source: string }[];
+  hasUserMessages: boolean;
+}> {
   const lastCommitTime = await getLastCommitTime(pi, ctx);
   const entries = getEntriesAfterTime(
     ctx.sessionManager.getBranch(),
@@ -144,7 +150,10 @@ async function getCommitContexts(
   }
 
   contexts.push({ text: await getGitContext(pi, ctx), source: GIT_SOURCE });
-  return contexts;
+  return {
+    contexts,
+    hasUserMessages: prompts.length > 0,
+  };
 }
 
 function isContextNotEnough(text: string): boolean {
@@ -205,19 +214,25 @@ async function askModel(
 async function stageAndCommit(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
-  commitMessage: string,
+  commitDraft: { subject: string; assistedBy?: string },
   logger: Logger,
 ): Promise<void> {
-  let finalCommitMessage = commitMessage;
+  let finalCommitMessage = formatCommitMessage(
+    commitDraft.subject,
+    commitDraft.assistedBy,
+  );
 
   if (ctx.hasUI) {
-    const edited = await ctx.ui.editor("Edit commit message", commitMessage);
+    const edited = await ctx.ui.editor(
+      "Edit commit message",
+      finalCommitMessage,
+    );
     if (edited === undefined) {
       logger.log("Commit was cancelled.", "warning");
       return;
     }
 
-    finalCommitMessage = normalizeOneLine(edited);
+    finalCommitMessage = normalizeCommitMessage(edited);
     if (!finalCommitMessage) {
       logger.log("Commit message is empty.", "warning");
       return;
@@ -363,6 +378,18 @@ function normalizeOneLine(text: string): string {
     .replace(/^commit message:\s*/i, "")
     .replace(/^['"`]+|['"`]+$/g, "")
     .trim();
+}
+
+function normalizeCommitMessage(text: string): string {
+  return text.replace(/\r\n/g, "\n").trim();
+}
+
+function formatCommitMessage(subject: string, assistedBy?: string): string {
+  return assistedBy ? `${subject}\n\nAssisted-by: ${assistedBy}` : subject;
+}
+
+function formatModelRef(model: { provider: string; id: string }): string {
+  return `${model.provider}/${model.id}`;
 }
 
 function buildCommitPrompt(contextText: string, source: string): string {

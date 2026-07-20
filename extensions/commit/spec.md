@@ -27,9 +27,11 @@ On invocation:
    Before and after each request, show a log entry
    with the prompt sent to the AI and the answer received. Log entries render
    as plain message text without a level prefix or background, using accent,
-   warning, or error colors. If the model says the context is insufficient, try
-   the next candidate. If the model is unavailable or authentication fails,
-   notify the user and stop.
+   warning, or error colors. If the session contains user prompts after the last
+   commit, seed the editable commit template with `Assisted-by: provider/modelId`
+   using the previously active model. If the model says the context is
+   insufficient, try the next candidate. If the model is unavailable or
+   authentication fails, notify the user and stop.
 5. Limit the combined git-fallback context (status, both diffs, and untracked
    summaries) to 5,000 characters; when truncating, append a clear marker.
 6. On a valid one-line subject, open `git commit` in the user’s editor with
