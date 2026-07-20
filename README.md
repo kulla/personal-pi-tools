@@ -28,6 +28,18 @@ Stops the current pi workflow, stashes tracked and untracked repository changes,
 
 Grill the user one question at a time to stress-test a plan, decision, or idea.
 
+### `/coding`
+
+Must use for all coding tasks: implement, edit, debug, review, or refactor code. Keep changes simple, safe, and aligned with the existing project.
+
+### `/refactor`
+
+Surgical code refactoring to improve maintainability without changing behavior.
+
+### `/refactor-skill-structure`
+
+Refactor an over-long or poorly structured `SKILL.md` by extracting examples, splitting compound procedures, and reorganizing for progressive disclosure.
+
 ## Sources
 
-- `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
+- `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
