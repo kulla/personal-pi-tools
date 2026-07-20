@@ -37,21 +37,33 @@ export default function (pi: ExtensionAPI) {
 }
 
 function findUndoTarget(entries: SessionEntry[]): SessionEntry | undefined {
-  for (let index = entries.length - 1; index >= 0; index -= 1) {
-    const entry = entries[index];
-    if (!entry || !isUserMessage(entry)) {
-      continue;
-    }
-
-    return index === 0 ? entry : entries[index - 1];
+  if (entries.length === 0) {
+    return undefined;
   }
 
-  return entries[0];
+  const lastUserMessageIndex = findLastUserMessageIndex(entries);
+  if (lastUserMessageIndex === -1) {
+    return entries[0];
+  }
+
+  return entries[lastUserMessageIndex - 1] ?? entries[lastUserMessageIndex];
 }
 
-function isUserMessage(entry: SessionEntry): entry is SessionEntry & {
+function findLastUserMessageIndex(entries: SessionEntry[]): number {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    if (isUserMessage(entries[index])) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+function isUserMessage(
+  entry: SessionEntry | undefined,
+): entry is SessionEntry & {
   type: "message";
   message: { role: "user" };
 } {
-  return entry.type === "message" && entry.message.role === "user";
+  return entry?.type === "message" && entry.message.role === "user";
 }
