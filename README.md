@@ -22,6 +22,12 @@ Usage:
 /commit
 ```
 
+## Skills
+
+### `/grill-me`
+
+Grill the user one question at a time to stress-test a plan, decision, or idea.
+
 ## Utilities
 
 ### `utils/logging.ts`
@@ -36,3 +42,7 @@ import { createLogger } from "./utils/logging.ts";
 const logger = createLogger(pi, "my-log");
 logger.log("Hello", "info");
 ```
+
+## Sources
+
+- `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
