@@ -7,9 +7,9 @@ import type {
   SessionEntry,
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
-import { git, gitText } from "../../utils/git.ts";
+import { getLastCommitTime, git, gitText } from "../../utils/git.ts";
 import { createLogger, type Logger } from "../../utils/logging.ts";
-import { getEntryTime } from "../../utils/session.ts";
+import { getEntriesAfterTime, getEntryTime } from "../../utils/session.ts";
 
 const GIT_SOURCE = "git status, diffs, and untracked files";
 const INSUFFICIENT_CONTEXT_RESPONSE = "CONTEXT_NOT_ENOUGH";
@@ -119,9 +119,10 @@ async function getCommitContexts(
   ctx: ExtensionCommandContext,
 ): Promise<{ text: string; source: string }[]> {
   const lastCommitTime = await getLastCommitTime(pi, ctx);
-  const entries = ctx.sessionManager
-    .getBranch()
-    .filter((entry) => getEntryTime(entry) > lastCommitTime);
+  const entries = getEntriesAfterTime(
+    ctx.sessionManager.getBranch(),
+    lastCommitTime,
+  );
 
   const results = entries.filter(isAssistantMessage);
   const prompts = entries.filter(isUserMessage);
@@ -327,15 +328,6 @@ async function hasChanges(
 ): Promise<boolean> {
   const status = await gitText(pi, ctx, ["status", "--porcelain"]);
   return status.trim().length > 0;
-}
-
-async function getLastCommitTime(
-  pi: ExtensionAPI,
-  ctx: ExtensionCommandContext,
-): Promise<number> {
-  const output = await gitText(pi, ctx, ["log", "-1", "--format=%ct"]);
-  const seconds = Number.parseInt(output.trim(), 10);
-  return Number.isFinite(seconds) ? seconds * 1000 : 0;
 }
 
 function renderTranscript(entries: SessionEntry[]): string {
