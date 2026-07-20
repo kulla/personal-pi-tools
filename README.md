@@ -12,15 +12,7 @@ pi install git:github.com/kulla/personal-pi-tools
 
 ### /commit
 
-Source: `extensions/commit/index.ts`
-
-Generates a conventional commit message from the current pi session and git diff, opens it in an editor for review, then stages all changes and commits with the accepted message. It tries user prompts first, then user prompts plus AI result messages, records durable info/warning/error log entries for each prompt sent to the LLM, and seeds the final template with `Assisted-by: provider/modelId` when the session has user prompts after the last commit.
-
-Usage:
-
-```text
-/commit
-```
+Generates a conventional commit message from the current pi session and git diff, opens it in an editor for review, then stages all changes and commits with the accepted message.
 
 ## Skills
 
