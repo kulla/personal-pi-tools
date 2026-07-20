@@ -42,4 +42,5 @@ Refactor an over-long or poorly structured `SKILL.md` by extracting examples, sp
 
 ## Sources
 
-- `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
+- `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
+- `/coding`: [JordanCoin/codingskills](https://github.com/JordanCoin/codingskills/) — MIT; [davidkiss/smart-ai-skills/skills/coding](https://github.com/davidkiss/smart-ai-skills/tree/main/skills/coding)
