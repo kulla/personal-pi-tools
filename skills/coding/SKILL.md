@@ -11,6 +11,7 @@ Use this checklist before changing code and before replying.
 - Read relevant files and project instructions first.
 - Make the smallest change that solves the task.
 - Prefer existing patterns, APIs, naming, and style.
+- Leave touched code a little better when the fix is obvious, safe, and in scope.
 - Optimize for reading, not writing; clear extra lines beat clever compression.
 - Use boring, well-understood tools and explicit control flow.
 - Do not add dependencies, frameworks, or broad scaffolding unless required.
@@ -43,6 +44,13 @@ Use this checklist before changing code and before replying.
 - Remove unused code paths and options; they still need tests, maintenance, and debugging.
 - Duplication can be cheaper than the wrong abstraction; wait until the pattern is clear.
 - YAGNI does not excuse weak structure, missing error handling, or ignoring known production failures.
+
+## Boy Scout Rule
+- In files you already touch, make small safe cleanups: clear names, dead imports, missing types, stale comments, magic values, simple warnings.
+- Do not refactor unfamiliar code without understanding it.
+- Do not turn incidental cleanup into redesign, behavior change, or multi-module work.
+- If cleanup is larger than ~20 lines, crosses module boundaries, or needs review, treat it as a separate refactor/task.
+- Keep cleanup separable from feature changes when possible; never make reverts risky.
 
 ## Verify
 - Review the diff against the request.
