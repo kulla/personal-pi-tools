@@ -1,9 +1,9 @@
 ---
-name: coding
-description: "MUST use for all coding tasks: implement, edit, debug, review, or refactor code. Keep changes simple, safe, and aligned with the existing project."
+name: implement
+description: "MUST use for all implementation tasks: implement, edit, debug, review, or refactor code. Keep changes simple, safe, and aligned with the existing project."
 ---
 
-# Coding
+# Implement
 
 Use this checklist before changing code and before replying.
 
