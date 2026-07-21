@@ -9,6 +9,10 @@ This extension provides two commands:
 - `/diffity-diff` opens the diffity diff viewer for the current repository’s working tree changes.
 - `/diffity-resolve` resolves open diffity review threads.
 
+## `diffity` manual reference
+
+Use `diffity --help` to access the CLI’s built-in manual and documentation when needed.
+
 ## `/diffity-diff`
 
 On invocation:
