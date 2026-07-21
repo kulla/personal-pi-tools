@@ -22,6 +22,14 @@ Aborts the current pi turn if one is running, waits for pi to become idle, then 
 
 Stops the current pi workflow, stashes tracked and untracked repository changes, then rewinds the session to the first entry after the latest git commit.
 
+### /diffity-diff
+
+Displays the current repository’s working tree diff.
+
+### /diffity-resolve
+
+Resolves open diffity review threads.
+
 ## Skills
 
 ### `/grill-me`
