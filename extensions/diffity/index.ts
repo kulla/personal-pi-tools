@@ -16,7 +16,7 @@ const DIFFITY_DIFF_CMD = "diffity";
 const DIFFITY_URL_PREFIX = "http://localhost:";
 const WAITING_FOR_USER_INPUT = "waiting for user input";
 const QUESTION_PREFIX = "[question]";
-const THREAD_CONTEXT_RADIUS = 20;
+const THREAD_CONTEXT_RADIUS = 3;
 const DIFFITY_SESSION_RESULT_TIMEOUT_MS = 1_800_000;
 const DIFFITY_SESSION_RESULT_POLL_MS = 100;
 
