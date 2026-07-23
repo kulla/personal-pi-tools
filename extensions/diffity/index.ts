@@ -27,7 +27,7 @@ export default function (pi: ExtensionAPI) {
       try {
         await openDiffity(pi, ctx, logger);
       } catch (error) {
-        //logger.log(getErrorMessage(error, "Unable to open diffity."), "error");
+        logger.log(getErrorMessage(error, "Unable to open diffity."), "error");
       }
     },
   });
