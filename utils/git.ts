@@ -2,7 +2,7 @@ import type {
   ExtensionAPI,
   ExtensionCommandContext,
 } from "@earendil-works/pi-coding-agent";
-import { getCommandErrorMessage } from "./process.ts";
+import { throwIfCommandFailed } from "./process.ts";
 
 export function git(
   pi: ExtensionAPI,
@@ -41,11 +41,10 @@ export async function stashChanges(
   ctx: ExtensionCommandContext,
 ): Promise<void> {
   const result = await git(pi, ctx, ["stash", "push", "--include-untracked"]);
-  if (result.code !== 0) {
-    throw new Error(
-      `Unable to stash repository changes: ${getCommandErrorMessage(result, "unknown error")}`,
-    );
-  }
+  throwIfCommandFailed(
+    result,
+    "Unable to stash repository changes: unknown error",
+  );
 }
 
 export async function getLastCommitTime(
@@ -53,11 +52,10 @@ export async function getLastCommitTime(
   ctx: ExtensionCommandContext,
 ): Promise<number> {
   const result = await git(pi, ctx, ["log", "-1", "--format=%ct"]);
-  if (result.code !== 0) {
-    throw new Error(
-      `Unable to read the latest git commit: ${getCommandErrorMessage(result, "unknown error")}`,
-    );
-  }
+  throwIfCommandFailed(
+    result,
+    "Unable to read the latest git commit: unknown error",
+  );
 
   const seconds = Number.parseInt(result.stdout.trim(), 10);
   if (!Number.isFinite(seconds)) {

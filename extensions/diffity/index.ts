@@ -9,7 +9,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
 import { git, gitText, requireGitRepository } from "../../utils/git.ts";
-import { getCommandErrorMessage } from "../../utils/process.ts";
+import { throwIfCommandFailed } from "../../utils/process.ts";
 import { createLogger, type Logger } from "../../utils/logging.ts";
 
 const DIFFITY_START_DELAY_MS = 2_000;
@@ -96,11 +96,7 @@ async function resolveDiffityThreads(
     "open",
     "--json",
   ]);
-  if (list.code !== 0) {
-    throw new Error(
-      getCommandErrorMessage(list, "No active diffity review session."),
-    );
-  }
+  throwIfCommandFailed(list, "No active diffity review session.");
 
   const threads = parseJsonArray(list.stdout, "diffity agent list output");
   if (threads.length === 0) {
@@ -243,11 +239,7 @@ async function resolveThread(
     "--summary",
     summary,
   ]);
-  if (result.code !== 0) {
-    throw new Error(
-      getCommandErrorMessage(result, `Unable to resolve thread ${threadId}.`),
-    );
-  }
+  throwIfCommandFailed(result, `Unable to resolve thread ${threadId}.`);
 }
 
 async function readThreadSource(
@@ -301,14 +293,7 @@ async function getRepoRoot(
   ctx: ExtensionCommandContext,
 ): Promise<string> {
   const result = await git(pi, ctx, ["rev-parse", "--show-toplevel"]);
-  if (result.code !== 0) {
-    throw new Error(
-      getCommandErrorMessage(
-        result,
-        "Unable to determine the git repository root.",
-      ),
-    );
-  }
+  throwIfCommandFailed(result, "Unable to determine the git repository root.");
 
   return result.stdout.trim();
 }
