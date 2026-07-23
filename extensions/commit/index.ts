@@ -350,7 +350,7 @@ async function hasChanges(
 }
 
 function renderTranscript(entries: SessionEntry[]): string {
-  return entries.map(renderEntry).filter(Boolean).join("\n\n");
+  return [...entries].reverse().map(renderEntry).filter(Boolean).join("\n\n");
 }
 
 function renderEntry(entry: SessionEntry): string {

@@ -15,8 +15,8 @@ On invocation:
 2. Get the latest commit timestamp (`git log -1 --format=%ct`). Consider only
    pi session entries newer than that timestamp.
 3. Try these context candidates, in order:
-   1. all user prompts;
-   2. those user prompts plus related AI result messages;
+   1. all user prompts, with newest entries first;
+   2. those user prompts plus related AI result messages, also newest first;
    3. a git fallback containing `git status --porcelain`, staged and working-tree
       `git diff`, and contents or summaries of untracked/new files.
 4. Before asking the AI, temporarily switch to
