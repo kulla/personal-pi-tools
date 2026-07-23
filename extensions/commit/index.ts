@@ -8,6 +8,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
 import { getLastCommitTime, git, gitText } from "../../utils/git.ts";
+import { getCommandErrorMessage } from "../../utils/process.ts";
 import { createLogger, type Logger } from "../../utils/logging.ts";
 import { getEntriesAfterTime, getEntryTime } from "../../utils/session.ts";
 
@@ -242,7 +243,7 @@ async function stageAndCommit(
   const add = await git(pi, ctx, ["add", "-A"]);
   if (add.code !== 0) {
     logger.log(
-      `Failed to stage changes for commit: ${add.stderr.trim() || add.stdout.trim() || "unknown error"}`,
+      `Failed to stage changes for commit: ${getCommandErrorMessage(add, "unknown error")}`,
       "error",
     );
     return;

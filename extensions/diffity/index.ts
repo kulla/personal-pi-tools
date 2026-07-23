@@ -9,6 +9,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
 import { git, gitText, requireGitRepository } from "../../utils/git.ts";
+import { getCommandErrorMessage } from "../../utils/process.ts";
 import { createLogger, type Logger } from "../../utils/logging.ts";
 
 const DIFFITY_START_DELAY_MS = 2_000;
@@ -97,9 +98,7 @@ async function resolveDiffityThreads(
   ]);
   if (list.code !== 0) {
     throw new Error(
-      list.stderr.trim() ||
-        list.stdout.trim() ||
-        "No active diffity review session.",
+      getCommandErrorMessage(list, "No active diffity review session."),
     );
   }
 
@@ -246,9 +245,7 @@ async function resolveThread(
   ]);
   if (result.code !== 0) {
     throw new Error(
-      result.stderr.trim() ||
-        result.stdout.trim() ||
-        `Unable to resolve thread ${threadId}.`,
+      getCommandErrorMessage(result, `Unable to resolve thread ${threadId}.`),
     );
   }
 }
@@ -306,9 +303,10 @@ async function getRepoRoot(
   const result = await git(pi, ctx, ["rev-parse", "--show-toplevel"]);
   if (result.code !== 0) {
     throw new Error(
-      result.stderr.trim() ||
-        result.stdout.trim() ||
+      getCommandErrorMessage(
+        result,
         "Unable to determine the git repository root.",
+      ),
     );
   }
 
