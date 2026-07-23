@@ -143,17 +143,12 @@ async function resolveThreadInCurrentSession(
 
 function buildThreadPrompt(thread: DiffityThread, source: string): string {
   const mode = isQuestionThread(thread)
-    ? "Answer the code review question in the current session."
-    : "Fix the code review thread in the current session.";
-  const action = isQuestionThread(thread)
-    ? "Use the current session tools to answer the question."
-    : "Use the current session tools to make the necessary file changes.";
+    ? "Answer the question."
+    : "Fix the code review thread.";
 
   return [
     mode,
-    action,
-    "Return a short plain-text summary when you are done.",
-    "Do not use markdown.",
+    "Return a short plain-text summary when you are done. Do not use markdown.",
     "",
     `File: ${thread.filePath}`,
     `Range: ${thread.startLine}-${thread.endLine}`,
