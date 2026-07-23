@@ -17,6 +17,8 @@ const DIFFITY_URL_PREFIX = "http://localhost:";
 const WAITING_FOR_USER_INPUT = "waiting for user input";
 const QUESTION_PREFIX = "[question]";
 const THREAD_CONTEXT_RADIUS = 20;
+const DIFFITY_SESSION_RESULT_TIMEOUT_MS = 1_800_000;
+const DIFFITY_SESSION_RESULT_POLL_MS = 100;
 
 export default function (pi: ExtensionAPI) {
   const logger = createLogger(pi);
@@ -140,17 +142,8 @@ async function resolveThreadInCurrentSession(
   );
   const beforeCount = ctx.sessionManager.getEntries().length;
   pi.sendUserMessage(buildThreadPrompt(thread, source));
-  await ctx.waitForIdle();
 
-  const summary = extractLatestAssistantSummary(
-    ctx.sessionManager.getEntries(),
-    beforeCount,
-  );
-  if (!summary) {
-    throw new Error(`Unable to read the result for thread ${thread.id}.`);
-  }
-
-  return summary;
+  return waitForAssistantSummary(ctx, beforeCount, thread.id);
 }
 
 function buildThreadPrompt(thread: DiffityThread, source: string): string {
@@ -176,6 +169,32 @@ function buildThreadPrompt(thread: DiffityThread, source: string): string {
     "Source context:",
     source,
   ].join("\n");
+}
+
+async function waitForAssistantSummary(
+  ctx: ExtensionCommandContext,
+  startIndex: number,
+  threadId: string,
+): Promise<string> {
+  const deadline = Date.now() + DIFFITY_SESSION_RESULT_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    if (ctx.signal?.aborted) {
+      throw new Error(`Unable to read the result for thread ${threadId}.`);
+    }
+
+    const summary = extractLatestAssistantSummary(
+      ctx.sessionManager.getEntries(),
+      startIndex,
+    );
+    if (summary) {
+      return summary;
+    }
+
+    await sleep(DIFFITY_SESSION_RESULT_POLL_MS);
+  }
+
+  throw new Error(`Unable to read the result for thread ${threadId}.`);
 }
 
 function extractLatestAssistantSummary(
