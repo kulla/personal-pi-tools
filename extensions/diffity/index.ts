@@ -404,50 +404,15 @@ function byResolutionOrder(a: DiffityThread, b: DiffityThread): number {
 }
 
 function parseJsonArray(text: string, source: string): unknown[] {
-  const data = parseModelJson(text, source);
-  if (Array.isArray(data)) return data;
-  throw new Error(`Unexpected ${source}.`);
-}
-
-function parseModelJson(
-  text: string,
-  source: string,
-): Record<string, unknown> | unknown[] {
-  const trimmed = stripCodeFences(text.trim());
-  const candidate = extractJsonCandidate(trimmed);
-  if (!candidate) {
-    throw new Error(`Unable to parse ${source}.`);
-  }
-
   try {
-    return JSON.parse(candidate) as Record<string, unknown> | unknown[];
+    const data = JSON.parse(text.trim()) as unknown;
+    if (Array.isArray(data)) return data;
+    throw new Error(`Unexpected ${source}.`);
   } catch (error) {
     throw new Error(
       `Unable to parse ${source}: ${getErrorMessage(error, "invalid JSON")}`,
     );
   }
-}
-
-function stripCodeFences(text: string): string {
-  return text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
-}
-
-function extractJsonCandidate(text: string): string | undefined {
-  const start = text.indexOf("{");
-  const arrayStart = text.indexOf("[");
-  if (start === -1 && arrayStart === -1) return undefined;
-
-  const openIndex =
-    start === -1
-      ? arrayStart
-      : arrayStart === -1
-        ? start
-        : Math.min(start, arrayStart);
-  const openChar = text[openIndex];
-  const closeChar = openChar === "{" ? "}" : "]";
-  const endIndex = text.lastIndexOf(closeChar);
-  if (endIndex <= openIndex) return undefined;
-  return text.slice(openIndex, endIndex + 1);
 }
 
 function truncateText(text: string, maxChars: number): string {
