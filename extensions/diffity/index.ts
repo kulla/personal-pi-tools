@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -74,6 +74,7 @@ async function openDiffity(
     logDiffityInstanceUrl(existingEntry, logger);
     return;
   }
+  if (diffityChild === undefined) return;
 
   spawnDiffity(ctx.cwd);
 
