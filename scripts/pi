@@ -1,5 +1,19 @@
 #!/bin/bash
 
+set -euo pipefail
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-nono run --allow "$ROOT_DIR" --profile pi -- pi
+SKILL_ARGS=()
+for skill_dir in "$ROOT_DIR"/skills/*; do
+  [ -d "$skill_dir" ] || continue
+  SKILL_ARGS+=(--skill "$skill_dir")
+done
+
+EXTENSION_ARGS=()
+for extension in "$ROOT_DIR"/extensions/*/index.ts; do
+  [ -f "$extension" ] || continue
+  EXTENSION_ARGS+=(-e "$extension")
+done
+
+nono run --allow "$ROOT_DIR" --profile pi -- pi --no-skills --no-extensions "${SKILL_ARGS[@]}" "${EXTENSION_ARGS[@]}" "$@"
