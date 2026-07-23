@@ -19,7 +19,7 @@ On invocation:
 
 1. Require the current directory to be a git repository with changes. If not, report an error and stop.
 2. Check that `diffity` is available with `which diffity`. If it is not found, report an error and stop.
-3. Run `diffity` in the background for the current worktree. Do not pass a ref or try to open the browser separately; diffity handles that itself.
+3. Run `diffity` in the background for the current worktree. Do not pass a ref or try to open the browser separately; diffity handles that itself. Keep the child process stderr attached to the current stderr so startup errors are visible.
 4. Wait about 2 seconds, then run `diffity list --json` to discover the running instance.
 5. Report a short status line with the local URL only, such as `http://localhost:5391`.
 6. If launching, discovery, or reporting fails, report the error and stop.
@@ -34,7 +34,7 @@ On invocation:
 4. If there are no open threads, say there is nothing to resolve and exit cleanly.
 5. Skip general comments (`__general__`).
 6. Skip threads whose last agent comment is waiting for user input.
-7. For each actionable thread, read the relevant source context, apply the requested fix automatically, then resolve the thread with a short summary.
-8. For `[question]` threads, answer the question, then resolve the thread with that answer as the summary.
+7. For each actionable thread, inject the thread into the current pi session one at a time, let the active agent make the code changes in that session, then resolve the diffity thread with the agent’s short result summary.
+8. For `[question]` threads, inject the question into the current pi session one at a time, let the active agent answer it in that session, then resolve the thread with that answer as the summary.
 9. Do not rerun `diffity agent list` at the end.
 10. Report completion and stop.

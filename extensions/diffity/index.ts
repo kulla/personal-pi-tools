@@ -1,11 +1,11 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { complete } from "@earendil-works/pi-ai/compat";
 import type {
   ExtensionAPI,
   ExtensionCommandContext,
+  SessionEntry,
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
 import { git, gitText, requireGitRepository } from "../../utils/git.ts";
@@ -27,7 +27,7 @@ export default function (pi: ExtensionAPI) {
       try {
         await openDiffity(pi, ctx, logger);
       } catch (error) {
-        logger.log(getErrorMessage(error, "Unable to open diffity."), "error");
+        //logger.log(getErrorMessage(error, "Unable to open diffity."), "error");
       }
     },
   });
@@ -117,150 +117,19 @@ async function resolveDiffityThreads(
     return;
   }
 
-  const model = ctx.model;
-  if (!model) {
-    throw new Error("No active model is available to resolve diffity threads.");
-  }
-
-  const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
-  if (!auth.ok || !auth.apiKey) {
-    throw new Error("Unable to authenticate the active model.");
-  }
-
-  const resolvedAuth = auth as ModelAuthSuccess;
+  await ctx.waitForIdle();
 
   for (const thread of actionableThreads) {
-    if (isQuestionThread(thread)) {
-      const answer = await answerQuestionThread(
-        ctx,
-        model,
-        resolvedAuth,
-        thread,
-      );
-      await resolveThread(pi, ctx, thread.id, answer);
-      continue;
-    }
-
-    const result = await fixThread(pi, ctx, model, resolvedAuth, thread);
-    if (result.filePath) {
-      await applyReplacement(
-        ctx.cwd,
-        result.filePath,
-        result.startLine,
-        result.endLine,
-        result.replacement,
-      );
-    }
-    await resolveThread(pi, ctx, thread.id, result.summary);
+    const summary = await resolveThreadInCurrentSession(pi, ctx, thread);
+    await resolveThread(pi, ctx, thread.id, summary);
   }
 
   logger.log("Resolved actionable diffity threads.");
 }
 
-type ModelAuth =
-  | {
-      ok: true;
-      apiKey?: string;
-      headers?: Record<string, string>;
-      env?: Record<string, string>;
-    }
-  | { ok: false; error: string };
-
-type ModelAuthSuccess = Extract<ModelAuth, { ok: true }>;
-
-async function fixThread(
-  _pi: ExtensionAPI,
+async function resolveThreadInCurrentSession(
+  pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
-  model: NonNullable<ExtensionCommandContext["model"]>,
-  auth: ModelAuthSuccess,
-  thread: DiffityThread,
-): Promise<{
-  filePath: string;
-  startLine: number;
-  endLine: number;
-  replacement: string;
-  summary: string;
-}> {
-  const filePath = thread.filePath;
-  const source = await readThreadSource(
-    ctx.cwd,
-    filePath,
-    thread.startLine,
-    thread.endLine,
-  );
-  const prompt = [
-    "You are fixing a code review thread.",
-    "Return only valid JSON with keys: summary, replacement.",
-    "summary must be a short sentence describing the fix.",
-    "replacement must be the updated source code for the selected range only.",
-    "Keep the rest of the file unchanged.",
-    "Do not use markdown.",
-    "",
-    `File: ${filePath}`,
-    `Range: ${thread.startLine}-${thread.endLine}`,
-    "",
-    "Thread comments:",
-    renderComments(thread.comments),
-    "",
-    "Source context:",
-    source,
-  ].join("\n");
-
-  const response = await complete(
-    model,
-    {
-      messages: [
-        {
-          role: "user",
-          content: [{ type: "text", text: prompt }],
-          timestamp: Date.now(),
-        },
-      ],
-    },
-    {
-      apiKey: auth.apiKey,
-      headers: auth.headers,
-      env: auth.env,
-      signal: ctx.signal,
-    },
-  );
-
-  const answer = response.content
-    .filter(isTextBlock)
-    .map((part) => part.text)
-    .join("\n")
-    .trim();
-  const data = parseModelJson(answer, "diffity fix response") as {
-    summary?: unknown;
-    replacement?: unknown;
-  };
-
-  if (
-    typeof data.summary !== "string" ||
-    typeof data.replacement !== "string"
-  ) {
-    throw new Error("The model did not return a valid fix response.");
-  }
-
-  const summary = normalizeSummary(data.summary);
-  const replacement = normalizeReplacement(data.replacement);
-  if (!summary || !replacement) {
-    throw new Error("The model returned an empty fix response.");
-  }
-
-  return {
-    filePath,
-    startLine: thread.startLine,
-    endLine: thread.endLine,
-    replacement,
-    summary,
-  };
-}
-
-async function answerQuestionThread(
-  ctx: ExtensionCommandContext,
-  model: NonNullable<ExtensionCommandContext["model"]>,
-  auth: ModelAuthSuccess,
   thread: DiffityThread,
 ): Promise<string> {
   const source = await readThreadSource(
@@ -269,10 +138,33 @@ async function answerQuestionThread(
     thread.startLine,
     thread.endLine,
   );
-  const prompt = [
-    "Answer the code review question.",
-    "Return only valid JSON with key: summary.",
-    "summary must be the short answer to the question.",
+  const beforeCount = ctx.sessionManager.getEntries().length;
+  pi.sendUserMessage(buildThreadPrompt(thread, source));
+  await ctx.waitForIdle();
+
+  const summary = extractLatestAssistantSummary(
+    ctx.sessionManager.getEntries(),
+    beforeCount,
+  );
+  if (!summary) {
+    throw new Error(`Unable to read the result for thread ${thread.id}.`);
+  }
+
+  return summary;
+}
+
+function buildThreadPrompt(thread: DiffityThread, source: string): string {
+  const mode = isQuestionThread(thread)
+    ? "Answer the code review question in the current session."
+    : "Fix the code review thread in the current session.";
+  const action = isQuestionThread(thread)
+    ? "Use the current session tools to answer the question."
+    : "Use the current session tools to make the necessary file changes.";
+
+  return [
+    mode,
+    action,
+    "Return a short plain-text summary when you are done.",
     "Do not use markdown.",
     "",
     `File: ${thread.filePath}`,
@@ -284,45 +176,40 @@ async function answerQuestionThread(
     "Source context:",
     source,
   ].join("\n");
+}
 
-  const response = await complete(
-    model,
-    {
-      messages: [
-        {
-          role: "user",
-          content: [{ type: "text", text: prompt }],
-          timestamp: Date.now(),
-        },
-      ],
-    },
-    {
-      apiKey: auth.apiKey,
-      headers: auth.headers,
-      env: auth.env,
-      signal: ctx.signal,
-    },
-  );
+function extractLatestAssistantSummary(
+  entries: SessionEntry[],
+  startIndex: number,
+): string | undefined {
+  for (let index = entries.length - 1; index >= startIndex; index -= 1) {
+    const entry = entries[index];
+    if (!entry || !isSessionMessageEntry(entry)) continue;
+    if (entry.message.role !== "assistant") continue;
 
-  const answer = response.content
+    const text = extractMessageText(entry.message.content);
+    if (text) {
+      return normalizeSummary(text);
+    }
+  }
+
+  return undefined;
+}
+
+function extractMessageText(content: unknown): string {
+  if (typeof content === "string") return content.trim();
+  if (!Array.isArray(content)) return "";
+  return content
     .filter(isTextBlock)
     .map((part) => part.text)
     .join("\n")
     .trim();
-  const data = parseModelJson(answer, "diffity question response") as {
-    summary?: unknown;
-  };
+}
 
-  if (typeof data.summary !== "string") {
-    throw new Error("The model did not return a valid question response.");
-  }
-
-  const summary = normalizeSummary(data.summary);
-  if (!summary) {
-    throw new Error("The model returned an empty question response.");
-  }
-
-  return summary;
+function isSessionMessageEntry(
+  entry: SessionEntry,
+): entry is Extract<SessionEntry, { type: "message" }> {
+  return entry.type === "message";
 }
 
 async function resolveThread(
@@ -345,34 +232,6 @@ async function resolveThread(
         `Unable to resolve thread ${threadId}.`,
     );
   }
-}
-
-async function applyReplacement(
-  cwd: string,
-  filePath: string,
-  startLine: number,
-  endLine: number,
-  replacement: string,
-): Promise<void> {
-  const fullPath = join(cwd, filePath);
-  const original = await readFile(fullPath, "utf8");
-  const hasTrailingNewline = original.endsWith("\n");
-  const newline = original.includes("\r\n") ? "\r\n" : "\n";
-  const lines = original.split(/\r?\n/);
-  if (hasTrailingNewline) {
-    lines.pop();
-  }
-
-  const startIndex = Math.max(0, startLine - 1);
-  const endIndex = Math.max(startIndex, endLine);
-  const replacementLines = replacement.replace(/\r\n/g, "\n").split("\n");
-  lines.splice(startIndex, endIndex - startIndex, ...replacementLines);
-  const updated = lines.join(newline);
-  await writeFile(
-    fullPath,
-    hasTrailingNewline ? `${updated}${newline}` : updated,
-    "utf8",
-  );
 }
 
 async function readThreadSource(
@@ -570,10 +429,6 @@ function extractJsonCandidate(text: string): string | undefined {
   const endIndex = text.lastIndexOf(closeChar);
   if (endIndex <= openIndex) return undefined;
   return text.slice(openIndex, endIndex + 1);
-}
-
-function normalizeReplacement(text: string): string {
-  return text.replace(/\r\n/g, "\n").trimEnd();
 }
 
 function truncateText(text: string, maxChars: number): string {
