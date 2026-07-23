@@ -19,10 +19,11 @@ On invocation:
 
 1. Require the current directory to be a git repository with changes. If not, report an error and stop.
 2. Check that `diffity` is available with `which diffity`. If it is not found, report an error and stop.
-3. Run `diffity` in the background for the current worktree. Do not pass a ref or try to open the browser separately; diffity handles that itself. Keep the child process stderr attached to the current stderr so startup errors are visible.
-4. Wait about 2 seconds, then run `diffity list --json` to discover the running instance.
-5. Report a short status line with the local URL only, such as `http://localhost:5391`.
-6. If launching, discovery, or reporting fails, report the error and stop.
+3. Check whether a diffity instance for the current repository is already running with `diffity list --json`. If one exists, reuse it and do not start a new one.
+4. If no matching instance exists, run `diffity` in the background for the current worktree. Do not pass a ref or try to open the browser separately; diffity handles that itself. Keep the child process stderr attached to the current stderr so startup errors are visible.
+5. Wait about 2 seconds, then run `diffity list --json` to discover the running instance.
+6. Report a short status line with the local URL only, such as `http://localhost:5391`.
+7. If launching, discovery, or reporting fails, report the error and stop.
 
 ## `/diffity-resolve`
 

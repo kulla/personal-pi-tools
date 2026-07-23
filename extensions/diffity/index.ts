@@ -63,22 +63,22 @@ async function openDiffity(
 
   const repoRoot = await getRepoRoot(pi, ctx);
   const repoHash = hashRepoRoot(repoRoot);
+  const existingEntry = await getRunningInstance(pi, ctx, repoHash);
+  if (existingEntry) {
+    logDiffityInstanceUrl(existingEntry, logger);
+    return;
+  }
+
   spawnDiffity(ctx.cwd);
 
   await sleep(DIFFITY_START_DELAY_MS);
 
-  const list = await runDiffity(pi, ctx, ["list", "--json"]);
-  const entries = parseJsonArray(list.stdout, "diffity list output");
-  const entry = selectInstance(entries, repoHash);
+  const entry = await getRunningInstance(pi, ctx, repoHash);
   if (!entry) {
     throw new Error("Unable to discover the running diffity instance.");
   }
 
-  if (typeof entry.port !== "number") {
-    throw new Error("Unable to read the diffity port.");
-  }
-
-  logger.log(`${DIFFITY_URL_PREFIX}${entry.port}`);
+  logDiffityInstanceUrl(entry, logger);
 }
 
 async function resolveDiffityThreads(
@@ -321,6 +321,28 @@ async function runDiffity(
   args: string[],
 ) {
   return runProcess(DIFFITY_DIFF_CMD, args, ctx.cwd, pi, ctx);
+}
+
+async function getRunningInstance(
+  pi: ExtensionAPI,
+  ctx: ExtensionCommandContext,
+  repoHash: string,
+): Promise<DiffityInstance | undefined> {
+  const list = await runDiffity(pi, ctx, ["list", "--json"]);
+  if (list.code !== 0) {
+    return undefined;
+  }
+
+  const entries = parseJsonArray(list.stdout, "diffity list output");
+  return selectInstance(entries, repoHash);
+}
+
+function logDiffityInstanceUrl(entry: DiffityInstance, logger: Logger): void {
+  if (typeof entry.port !== "number") {
+    throw new Error("Unable to read the diffity port.");
+  }
+
+  logger.log(`${DIFFITY_URL_PREFIX}${entry.port}`);
 }
 
 async function runProcess(
