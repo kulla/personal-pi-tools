@@ -16,7 +16,6 @@ const DIFFITY_START_DELAY_MS = 2_000;
 const DIFFITY_DIFF_CMD = "diffity";
 const DIFFITY_URL_PREFIX = "http://localhost:";
 const WAITING_FOR_USER_INPUT = "waiting for user input";
-const QUESTION_PREFIX = "[question]";
 const THREAD_CONTEXT_RADIUS = 3;
 const DIFFITY_SESSION_RESULT_TIMEOUT_MS = 1_800_000;
 const DIFFITY_SESSION_RESULT_POLL_MS = 100;
@@ -142,12 +141,8 @@ async function resolveThreadInCurrentSession(
 }
 
 function buildThreadPrompt(thread: DiffityThread, source: string): string {
-  const mode = isQuestionThread(thread)
-    ? "Answer the question."
-    : "Fix the code review thread.";
-
   return [
-    mode,
+    "Fix the code review thread.",
     "Return a short plain-text summary when you are done. Do not use markdown.",
     "",
     `File: ${thread.filePath}`,
@@ -380,11 +375,6 @@ function isActionableThread(thread: DiffityThread): boolean {
   }
 
   return !isLastAgentCommentWaiting(thread);
-}
-
-function isQuestionThread(thread: DiffityThread): boolean {
-  const firstComment = thread.comments[0]?.body.trim().toLowerCase() ?? "";
-  return firstComment.startsWith(QUESTION_PREFIX);
 }
 
 function isLastAgentCommentWaiting(thread: DiffityThread): boolean {

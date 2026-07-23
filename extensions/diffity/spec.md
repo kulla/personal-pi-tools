@@ -36,6 +36,5 @@ On invocation:
 5. Skip general comments (`__general__`).
 6. Skip threads whose last agent comment is waiting for user input.
 7. For each actionable thread, inject the thread into the current pi session one at a time, let the active agent make the code changes in that session, then resolve the diffity thread with the agent’s short result summary.
-8. For `[question]` threads, inject the question into the current pi session one at a time, let the active agent answer it in that session, then resolve the thread with that answer as the summary.
-9. Do not rerun `diffity agent list` at the end.
-10. Report completion and stop.
+8. Do not rerun `diffity agent list` at the end.
+9. Report completion and stop.
