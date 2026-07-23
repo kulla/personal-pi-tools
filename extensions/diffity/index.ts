@@ -9,8 +9,8 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
 import { git, gitText, requireGitRepository } from "../../utils/git.ts";
-import { throwIfCommandFailed } from "../../utils/process.ts";
 import { createLogger, type Logger } from "../../utils/logging.ts";
+import { throwIfCommandFailed } from "../../utils/process.ts";
 
 const DIFFITY_START_DELAY_MS = 2_000;
 const DIFFITY_DIFF_CMD = "diffity";
