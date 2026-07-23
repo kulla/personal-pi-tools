@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -20,8 +20,14 @@ const THREAD_CONTEXT_RADIUS = 3;
 const DIFFITY_SESSION_RESULT_TIMEOUT_MS = 1_800_000;
 const DIFFITY_SESSION_RESULT_POLL_MS = 100;
 
+let diffityChild: ChildProcess | undefined;
+
 export default function (pi: ExtensionAPI) {
   const logger = createLogger(pi);
+
+  pi.on("session_shutdown", () => {
+    stopDiffityChild();
+  });
 
   pi.registerCommand("diffity-diff", {
     description: "Open diffity for the current worktree changes",
@@ -258,9 +264,28 @@ function spawnDiffity(cwd: string): void {
   const child = spawn(DIFFITY_DIFF_CMD, [], {
     cwd,
     detached: true,
-    stdio: "ignore",
+    stdio: ["ignore", "ignore", "inherit"],
+  });
+
+  diffityChild = child;
+  child.once("close", () => {
+    if (diffityChild === child) {
+      diffityChild = undefined;
+    }
   });
   child.unref();
+}
+
+function stopDiffityChild(): void {
+  if (!diffityChild) return;
+
+  try {
+    diffityChild.kill();
+  } catch {
+    // Ignore failures during shutdown.
+  }
+
+  diffityChild = undefined;
 }
 
 async function requireDiffity(): Promise<void> {
