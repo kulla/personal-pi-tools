@@ -1,6 +1,6 @@
 ---
 name: implement
-description: "MUST use for all implementation tasks: implement, edit, debug, review, or refactor code. Keep changes simple, safe, and aligned with the existing project."
+description: "MUST use for implementation tasks on source code: implement, edit, debug, review, or refactor source files. Keep changes simple, safe, and aligned with the existing project."
 ---
 
 # Implement
