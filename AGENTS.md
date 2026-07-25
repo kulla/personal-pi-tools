@@ -1,5 +1,5 @@
 - Personal pi tools package: make small, focused changes; avoid generic scaffolding.
-- Keep each colocated `spec.md` synchronized with implementation changes.
+- Keep each colocated `README.md` synchronized with implementation changes.
 - Validate TypeScript by invoking local tools directly:
   - `./node_modules/.bin/tsc --noEmit && echo OK`
   - `./node_modules/.bin/biome format --write .`
