@@ -125,6 +125,7 @@ async function resolveDiffityThreads(
   for (const thread of actionableThreads) {
     const summary = await resolveThreadInCurrentSession(pi, ctx, thread);
     await resolveThread(pi, ctx, thread.id, summary);
+    await ctx.waitForIdle();
   }
 
   logger.log("Resolved actionable diffity threads.");
