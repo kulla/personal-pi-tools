@@ -347,6 +347,9 @@ async function hasChanges(
 }
 
 function renderTranscript(entries: SessionEntry[]): string {
+  // From experince the model weights the last message as the most relevant one
+  // and the first message conveys the meaning of the current session the most.
+  // Therefore we reverse the list here.
   return [...entries].reverse().map(renderEntry).filter(Boolean).join("\n\n");
 }
 
