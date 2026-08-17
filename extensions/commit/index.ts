@@ -347,10 +347,8 @@ async function hasChanges(
 }
 
 function renderTranscript(entries: SessionEntry[]): string {
-  // From experince the model weights the last message as the most relevant one
-  // and the first message conveys the meaning of the current session the most.
-  // Therefore we reverse the list here.
-  return [...entries].reverse().map(renderEntry).filter(Boolean).join("\n\n");
+  // Keep chronological order so the first messages can better convey the intent.
+  return [...entries].map(renderEntry).filter(Boolean).join("\n\n");
 }
 
 function renderEntry(entry: SessionEntry): string {
@@ -403,6 +401,7 @@ function buildCommitPrompt(contextText: string, source: string): string {
     "Otherwise return exactly one line and nothing else.",
     "Use format: type(scope): description or type: description.",
     "Prefer a meaningful scope when obvious.",
+    "When there are multiple user messages, the first ones usually convey the intent better than later clarifications; prioritize them.",
     "",
     `Context source: ${source}`,
     "<context>",
