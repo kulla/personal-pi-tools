@@ -347,7 +347,6 @@ async function hasChanges(
 }
 
 function renderTranscript(entries: SessionEntry[]): string {
-  // Keep chronological order so the first messages can better convey the intent.
   return [...entries].map(renderEntry).filter(Boolean).join("\n\n");
 }
 
