@@ -19,7 +19,7 @@ const AI_MESSAGE_LOG_MAX_CHARS = 500;
 const UNTRACKED_FILE_LIMIT = 10;
 const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400;
 const COMMIT_MODEL_PROVIDER = "openai-codex";
-const COMMIT_MODEL_ID = "gpt-5.4-mini";
+const COMMIT_MODEL_ID = "gpt-5.6-luna";
 
 export default function (pi: ExtensionAPI) {
   const logger = createLogger(pi);
