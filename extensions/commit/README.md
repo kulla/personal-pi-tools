@@ -6,7 +6,7 @@ Generates a one-line conventional commit subject from the current pi session and
 
 ## Behavior
 
-- Tries session prompts, then prompts plus assistant replies, then git status/diff/untracked file context.
+- Tries session prompts together with assistant replies, then prompts alone, then git status/diff/untracked file context.
 - Temporarily switches to a small model, asks for one conventional-commit subject, and restores the previous model.
 - If the subject is valid, opens `git commit` in the editor with the generated message; the user can edit it before staging and committing.
 - Adds `Assisted-by: provider/modelId` when the current session has user prompts.

@@ -136,18 +136,19 @@ async function getCommitContexts(
   const contexts: { text: string; source: string }[] = [];
 
   const promptText = renderTranscript(prompts);
-  if (promptText) {
-    contexts.push({ text: promptText, source: "session user prompts" });
+  const sessionText = renderTranscript([...prompts, ...results].sort(byTime));
+
+  // Send each user prompt together with the assistant answer that follows it.
+  // This gives the model the intent and the result of the work in one context.
+  if (sessionText) {
+    contexts.push({
+      text: sessionText,
+      source: "session user prompts and assistant answers",
+    });
   }
 
-  if (results.length > 0) {
-    const sessionText = renderTranscript([...prompts, ...results].sort(byTime));
-    if (sessionText && sessionText !== promptText) {
-      contexts.push({
-        text: sessionText,
-        source: "session user prompts and result messages",
-      });
-    }
+  if (promptText && sessionText !== promptText) {
+    contexts.push({ text: promptText, source: "session user prompts" });
   }
 
   contexts.push({ text: await getGitContext(pi, ctx), source: GIT_SOURCE });
