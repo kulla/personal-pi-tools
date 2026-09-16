@@ -30,6 +30,10 @@ Displays the current repository’s working tree diff.
 
 Resolves open diffity review threads.
 
+### /caveman
+
+Adds a concise, technical caveman-style prompt to every agent turn.
+
 ## Skills
 
 ### `/grill-me`
@@ -43,3 +47,4 @@ Surgical code refactoring to improve maintainability without changing behavior.
 ## Sources
 
 - `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
+- `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
