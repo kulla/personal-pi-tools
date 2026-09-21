@@ -335,8 +335,9 @@ async function isGitRepo(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
 ): Promise<boolean> {
-  const result = await git(pi, ctx, ["rev-parse", "--is-inside-work-tree"]);
-  return result.code === 0 && result.stdout.trim() === "true";
+  return (
+    (await gitText(pi, ctx, ["rev-parse", "--is-inside-work-tree"])) === "true"
+  );
 }
 
 async function hasChanges(
