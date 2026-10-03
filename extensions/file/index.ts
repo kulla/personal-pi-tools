@@ -4,12 +4,9 @@ import {
   type ExtensionAPI,
 } from "@earendil-works/pi-coding-agent";
 
-const FILE_CONTEXT_TYPE = "file-context";
 const REFERENCE_PATTERN = /(?<![\w@/:\\])@([^\s"'`<>]+)/gu;
 const TRAILING_PUNCTUATION = /[.,;:!?\]\)}]+$/gu;
 const MAX_ERROR_LENGTH = 200;
-
-type ContextContent = TextContent | ImageContent;
 
 export default function (pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx) => {
@@ -18,10 +15,11 @@ export default function (pi: ExtensionAPI) {
 
     const read = createReadTool(ctx.cwd);
     const files = await Promise.all(
-      paths.map(async (path, index): Promise<ContextContent[]> => {
-        const content: ContextContent[] = [];
-        if (index > 0) content.push({ type: "text", text: "\n\n" });
-        content.push({ type: "text", text: `File: ${path}\n` });
+      paths.map(async (path, index) => {
+        const content: (TextContent | ImageContent)[] = [
+          { type: "text", text: `File: ${path}\n` },
+        ];
+        if (index > 0) content.unshift({ type: "text", text: "\n\n" });
 
         try {
           const result = await read.execute("auto-read", { path }, ctx.signal);
@@ -38,7 +36,7 @@ export default function (pi: ExtensionAPI) {
 
     return {
       message: {
-        customType: FILE_CONTEXT_TYPE,
+        customType: "file-context",
         content: files.flat(),
         display: false,
       },
@@ -50,14 +48,11 @@ export function parseReferences(prompt: string): string[] {
   const paths = new Set<string>();
 
   for (const match of prompt.matchAll(REFERENCE_PATTERN)) {
-    const rawPath = match[1];
-    if (!rawPath) continue;
-
-    const path = rawPath.replace(TRAILING_PUNCTUATION, "");
+    const path = match[1]?.replace(TRAILING_PUNCTUATION, "");
     if (
       !path ||
       path.startsWith("@") ||
-      isUrl(path) ||
+      /^[a-z][a-z\d+.-]*:\/\//iu.test(path) ||
       /[*?{}[\]]/u.test(path)
     ) {
       continue;
@@ -67,10 +62,6 @@ export function parseReferences(prompt: string): string[] {
   }
 
   return [...paths];
-}
-
-function isUrl(path: string): boolean {
-  return /^[a-z][a-z\d+.-]*:\/\//iu.test(path);
 }
 
 function formatError(error: unknown): string {
