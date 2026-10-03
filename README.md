@@ -50,7 +50,7 @@ Surgical code refactoring to improve maintainability without changing behavior.
 
 ### `/skill:ponytail`
 
-Use on every implementation, refactoring, and code review task in default `full` mode: reuse existing code, prefer standard libraries and native features, and build the smallest correct solution. Explicit arguments `lite`, `full`, or `ultra` change intensity; “stop ponytail” or “normal mode” disables it.
+Builds the smallest correct solution by reusing existing code, preferring standard libraries and native features, and avoiding unnecessary abstractions and dependencies without sacrificing safety. Based on [DietrichGebert's Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md).
 
 ## Sources
 
