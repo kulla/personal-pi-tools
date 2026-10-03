@@ -10,12 +10,6 @@ const TRAILING_PUNCTUATION = /[.,;:!?\]\)}]+$/gu;
 const MAX_ERROR_LENGTH = 200;
 
 type ContextContent = TextContent | ImageContent;
-type ReadResult = Awaited<
-  ReturnType<ReturnType<typeof createReadTool>["execute"]>
->;
-type FileContext =
-  | { path: string; result: ReadResult }
-  | { path: string; error: string };
 
 export default function (pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx) => {
@@ -24,20 +18,28 @@ export default function (pi: ExtensionAPI) {
 
     const read = createReadTool(ctx.cwd);
     const files = await Promise.all(
-      paths.map(async (path): Promise<FileContext> => {
+      paths.map(async (path, index): Promise<ContextContent[]> => {
+        const content: ContextContent[] = [];
+        if (index > 0) content.push({ type: "text", text: "\n\n" });
+        content.push({ type: "text", text: `File: ${path}\n` });
+
         try {
           const result = await read.execute("auto-read", { path }, ctx.signal);
-          return { path, result };
+          content.push(...result.content);
         } catch (error) {
-          return { path, error: formatError(error) };
+          content.push({
+            type: "text",
+            text: `[Unable to read: ${formatError(error)}]`,
+          });
         }
+        return content;
       }),
     );
 
     return {
       message: {
         customType: FILE_CONTEXT_TYPE,
-        content: formatFiles(files),
+        content: files.flat(),
         display: false,
       },
     };
@@ -45,8 +47,7 @@ export default function (pi: ExtensionAPI) {
 }
 
 export function parseReferences(prompt: string): string[] {
-  const paths: string[] = [];
-  const seen = new Set<string>();
+  const paths = new Set<string>();
 
   for (const match of prompt.matchAll(REFERENCE_PATTERN)) {
     const rawPath = match[1];
@@ -56,38 +57,16 @@ export function parseReferences(prompt: string): string[] {
     if (
       !path ||
       path.startsWith("@") ||
-      seen.has(path) ||
       isUrl(path) ||
       /[*?{}[\]]/u.test(path)
     ) {
       continue;
     }
 
-    seen.add(path);
-    paths.push(path);
+    paths.add(path);
   }
 
-  return paths;
-}
-
-function formatFiles(files: FileContext[]): ContextContent[] {
-  const content: ContextContent[] = [];
-
-  for (const [index, file] of files.entries()) {
-    if (index > 0) {
-      content.push({ type: "text", text: "\n\n" });
-    }
-
-    content.push({ type: "text", text: `File: ${file.path}\n` });
-    if ("error" in file) {
-      content.push({ type: "text", text: `[Unable to read: ${file.error}]` });
-      continue;
-    }
-
-    content.push(...file.result.content);
-  }
-
-  return content;
+  return [...paths];
 }
 
 function isUrl(path: string): boolean {
