@@ -10,6 +10,10 @@ pi install git:github.com/kulla/personal-pi-tools
 
 ## Extensions
 
+### /luna and /sol
+
+Switches to `openai-codex/gpt-6-luna` or `openai-codex/gpt-6.1-sol` while preserving conversation history. Uses existing Pi model registration and authentication.
+
 ### /commit
 
 Generates a conventional commit message from the current pi session and git diff, opens it in an editor for review, then stages all changes and commits with the accepted message.
