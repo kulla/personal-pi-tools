@@ -14,6 +14,10 @@ pi install git:github.com/kulla/personal-pi-tools
 
 Generates a conventional commit message from the current pi session and git diff, opens it in an editor for review, then stages all changes and commits with the accepted message.
 
+### `@file`
+
+Automatically loads files referenced with `@path` into hidden context before each agent turn.
+
 ### /undo
 
 Aborts the current pi turn if one is running, waits for pi to become idle, then rewinds the session without creating a summary.
