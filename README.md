@@ -48,7 +48,12 @@ Grill the user one question at a time to stress-test a plan, decision, or idea.
 
 Surgical code refactoring to improve maintainability without changing behavior.
 
+### `/skill:ponytail`
+
+Use on every implementation and refactoring in default `full` mode: reuse existing code, prefer standard libraries and native features, and build the smallest correct solution. Explicit arguments `lite`, `full`, or `ultra` change intensity; “stop ponytail” or “normal mode” disables it.
+
 ## Sources
 
 - `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
 - `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
+- `/skill:ponytail`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT
