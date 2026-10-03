@@ -16,7 +16,7 @@ Generates a conventional commit message from the current pi session and git diff
 
 ### `@path`
 
-Automatically loads files referenced with `@path` into hidden context before each agent turn.
+Automatically loads files and shallow directory listings referenced with `@path` into hidden context before each agent turn.
 
 ### /undo
 

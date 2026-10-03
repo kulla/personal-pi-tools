@@ -1,3 +1,6 @@
+import { readdir, stat } from "node:fs/promises";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
 import type { ImageContent, TextContent } from "@earendil-works/pi-ai";
 import {
   createReadTool,
@@ -7,6 +10,7 @@ import {
 const REFERENCE_PATTERN = /(?<![\w@/:\\])@([^\s"'`<>]+)/gu;
 const TRAILING_PUNCTUATION = /[.,;:!?\]\)}]+$/gu;
 const MAX_ERROR_LENGTH = 200;
+const MAX_DIRECTORY_ENTRIES = 200;
 
 export default function (pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx) => {
@@ -16,14 +20,35 @@ export default function (pi: ExtensionAPI) {
     const read = createReadTool(ctx.cwd);
     const files = await Promise.all(
       paths.map(async (path, index) => {
-        const content: (TextContent | ImageContent)[] = [
-          { type: "text", text: `File: ${path}\n` },
-        ];
+        const header: TextContent = { type: "text", text: `File: ${path}\n` };
+        const content: (TextContent | ImageContent)[] = [header];
         if (index > 0) content.unshift({ type: "text", text: "\n\n" });
 
         try {
-          const result = await read.execute("auto-read", { path }, ctx.signal);
-          content.push(...result.content);
+          ctx.signal?.throwIfAborted();
+          const expandedPath =
+            path === "~" || path.startsWith("~/")
+              ? homedir() + path.slice(1)
+              : path;
+          const absolutePath = resolve(ctx.cwd, expandedPath);
+          const isDirectory = await stat(absolutePath).then(
+            (info) => info.isDirectory(),
+            () => false,
+          );
+
+          if (isDirectory) {
+            header.text = `Directory: ${path}\n`;
+            const listing = await listDirectory(absolutePath);
+            ctx.signal?.throwIfAborted();
+            content.push({ type: "text", text: listing });
+          } else {
+            const result = await read.execute(
+              "auto-read",
+              { path },
+              ctx.signal,
+            );
+            content.push(...result.content);
+          }
         } catch (error) {
           content.push({
             type: "text",
@@ -62,6 +87,27 @@ export function parseReferences(prompt: string): string[] {
   }
 
   return [...paths];
+}
+
+async function listDirectory(path: string): Promise<string> {
+  const entries = await readdir(path, { withFileTypes: true });
+  entries.sort(
+    (a, b) =>
+      Number(b.isDirectory()) - Number(a.isDirectory()) ||
+      a.name.localeCompare(b.name),
+  );
+
+  if (entries.length === 0) return "(empty directory)";
+
+  const lines = entries
+    .slice(0, MAX_DIRECTORY_ENTRIES)
+    .map((entry) => `${entry.name}${entry.isDirectory() ? "/" : ""}`);
+  if (entries.length > MAX_DIRECTORY_ENTRIES) {
+    lines.push(
+      `[Truncated: showing ${MAX_DIRECTORY_ENTRIES} of ${entries.length} entries]`,
+    );
+  }
+  return lines.join("\n");
 }
 
 function formatError(error: unknown): string {
