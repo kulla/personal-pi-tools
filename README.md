@@ -44,9 +44,9 @@ Adds a concise, technical caveman-style prompt to every agent turn.
 
 Grill the user one question at a time to stress-test a plan, decision, or idea.
 
-### `/refactor`
+### `/code-simplification`
 
-Surgical code refactoring to improve maintainability without changing behavior.
+Simplifies code for clarity while preserving exact behavior.
 
 ### `/skill:ponytail`
 
@@ -56,4 +56,5 @@ Builds the smallest correct solution by reusing existing code, preferring standa
 
 - `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
 - `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
+- `/code-simplification`: [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills/blob/main/skills/code-simplification/SKILL.md)
 - `/skill:ponytail`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT
