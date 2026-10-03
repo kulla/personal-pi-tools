@@ -14,7 +14,7 @@ pi install git:github.com/kulla/personal-pi-tools
 
 Generates a conventional commit message from the current pi session and git diff, opens it in an editor for review, then stages all changes and commits with the accepted message.
 
-### `@file`
+### `@path`
 
 Automatically loads files referenced with `@path` into hidden context before each agent turn.
 

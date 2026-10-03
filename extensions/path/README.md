@@ -1,6 +1,6 @@
-# `@file` extension
+# `@path` extension
 
-**Implementation:** `extensions/file/index.ts`
+**Implementation:** `extensions/path/index.ts`
 
 Loads files referenced with `@path` before each agent turn.
 
