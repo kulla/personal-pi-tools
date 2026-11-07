@@ -24,7 +24,7 @@ async function attach(prompt: string, cwd: string) {
   } as unknown as ExtensionAPI);
   assert.ok(handler);
   const result = await handler(
-    { prompt } as BeforeAgentStartEvent,
+    { messageType: "user", prompt } as BeforeAgentStartEvent,
     { cwd } as ExtensionContext,
   );
   assert.ok(result?.message);
@@ -36,6 +36,26 @@ async function attach(prompt: string, cwd: string) {
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("");
 }
+
+test("custom-message runs do not load file references", async () => {
+  let handler:
+    | ExtensionHandler<BeforeAgentStartEvent, BeforeAgentStartEventResult>
+    | undefined;
+  pathExtension({
+    on(_event: string, callback: typeof handler) {
+      handler = callback;
+    },
+  } as unknown as ExtensionAPI);
+  assert.ok(handler);
+  const result = await handler(
+    {
+      messageType: "custom",
+      message: { content: "@missing" },
+    } as BeforeAgentStartEvent,
+    {} as ExtensionContext,
+  );
+  assert.equal(result, undefined);
+});
 
 async function fixture(t: TestContext) {
   const cwd = await mkdtemp(join(tmpdir(), "pi-path-test-"));

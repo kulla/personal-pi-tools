@@ -6,7 +6,7 @@ Loads files and directory listings referenced with `@path` before each agent tur
 
 ## Behavior
 
-- Supports multiple references and reads each path once per prompt.
+- Supports multiple references and reads each path once per user prompt; skips extension-triggered custom-message runs.
 - Loads paths concurrently while preserving reference order.
 - Uses Pi's built-in `read` tool for files, including truncation, image, and binary handling.
 - Lists immediate directory children, including hidden entries, without loading file contents or traversing subdirectories.

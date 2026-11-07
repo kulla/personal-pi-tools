@@ -14,6 +14,7 @@ const MAX_DIRECTORY_ENTRIES = 200;
 
 export default function (pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx) => {
+    if (event.messageType !== "user") return;
     const paths = parseReferences(event.prompt);
     if (paths.length === 0) return;
 

@@ -1,6 +1,5 @@
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { complete } from "@earendil-works/pi-ai/compat";
 import type {
   ExtensionAPI,
   ExtensionCommandContext,
@@ -57,9 +56,8 @@ async function generateCommitMessage(
   logger: Logger,
 ): Promise<{ subject: string; assistedBy?: string } | null> {
   const { contexts, hasUserMessages } = await getCommitContexts(pi, ctx);
-  const previousModel = ctx.model;
-  const previousThinkingLevel = pi.getThinkingLevel();
-  if (!previousModel) {
+  const sessionModel = ctx.model;
+  if (!sessionModel) {
     logger.log("No active model is available.", "error");
     return null;
   }
@@ -76,51 +74,46 @@ async function generateCommitMessage(
     return null;
   }
 
-  try {
-    if (!(await pi.setModel(commitModel))) {
-      logger.log(
-        `Unable to authenticate commit model ${COMMIT_MODEL_PROVIDER}/${COMMIT_MODEL_ID}.`,
-        "error",
-      );
+  for (const context of contexts) {
+    const prompt = buildCommitPrompt(context.text, context.source);
+    logger.log(
+      `Generate commit (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
+      "info",
+    );
+    const response = await ctx.modelRegistry
+      .streamSimple(
+        commitModel,
+        {
+          messages: [
+            {
+              role: "user",
+              content: [{ type: "text", text: prompt }],
+              timestamp: Date.now(),
+            },
+          ],
+        },
+        { reasoning: "low", signal: ctx.signal },
+      )
+      .result();
+    if (response.stopReason === "error" || response.stopReason === "aborted")
       return null;
-    }
-    pi.setThinkingLevel("low");
+    const commitMessage = normalizeOneLine(
+      response.content
+        .filter(isTextBlock)
+        .map((part) => part.text)
+        .join("\n"),
+    );
+    if (!commitMessage || isContextNotEnough(commitMessage)) continue;
 
-    for (const context of contexts) {
-      const prompt = buildCommitPrompt(context.text, context.source);
-      logger.log(
-        `Generate commit (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
-        "info",
-      );
-      const message = await askModel(ctx, prompt, logger);
-      const commitMessage = normalizeOneLine(message ?? "");
-      if (!commitMessage) continue;
-      if (isContextNotEnough(commitMessage)) {
-        continue;
-      }
-
-      return {
-        subject: commitMessage,
-        assistedBy: hasUserMessages
-          ? `${previousModel.provider}/${previousModel.id}`
-          : undefined,
-      };
-    }
-
-    return null;
-  } finally {
-    try {
-      if (!(await pi.setModel(previousModel))) {
-        logger.log("Unable to restore the previously active model.", "error");
-      }
-    } catch (error) {
-      logger.log(
-        `Unable to restore the previously active model: ${getErrorMessage(error, "unknown error")}`,
-        "error",
-      );
-    }
-    pi.setThinkingLevel(previousThinkingLevel);
+    return {
+      subject: commitMessage,
+      assistedBy: hasUserMessages
+        ? `${sessionModel.provider}/${sessionModel.id}`
+        : undefined,
+    };
   }
+
+  return null;
 }
 
 async function getCommitContexts(
@@ -174,48 +167,6 @@ function isContextNotEnough(text: string): boolean {
     normalized === "NEEDMORECONTEXT" ||
     normalized === "MORECONTEXTNEEDED"
   );
-}
-
-async function askModel(
-  ctx: ExtensionCommandContext,
-  prompt: string,
-  logger: Logger,
-): Promise<string | null> {
-  const model = ctx.model;
-  if (!model) {
-    logger.log("No active model is available.", "error");
-    return null;
-  }
-
-  const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
-  if (!auth.ok || !auth.apiKey) {
-    logger.log("Unable to authenticate the active model.", "error");
-    return null;
-  }
-
-  const response = await complete(
-    model,
-    {
-      messages: [
-        {
-          role: "user",
-          content: [{ type: "text", text: prompt }],
-          timestamp: Date.now(),
-        },
-      ],
-    },
-    {
-      apiKey: auth.apiKey,
-      headers: auth.headers,
-      env: auth.env,
-      signal: ctx.signal,
-    },
-  );
-
-  return response.content
-    .filter(isTextBlock)
-    .map((part) => part.text)
-    .join("\n");
 }
 
 async function stageAndCommit(
