@@ -1,7 +1,7 @@
 # Model switching
 
-- `/luna` switches to `openai-codex/gpt-6-luna`.
-- `/sol` switches to `openai-codex/gpt-6.1-sol`.
+- `/luna` switches to `openai/gpt-6-luna`.
+- `/sol` switches to `openai/gpt-6-sol`.
 
 Both commands use Pi’s model registry and authentication. Models must already be registered; this extension does not add models or credentials. Missing models or credentials produce an error instead of a success notification.
 

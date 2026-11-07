@@ -3,9 +3,9 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 export default function (pi: ExtensionAPI) {
   for (const [command, modelId] of [
     ["luna", "gpt-6-luna"],
-    ["sol", "gpt-6.1-sol"],
+    ["sol", "gpt-6-sol"],
   ] as const) {
-    const provider = "openai-codex";
+    const provider = "openai";
     const modelRef = `${provider}/${modelId}`;
 
     pi.registerCommand(command, {

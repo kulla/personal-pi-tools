@@ -27,11 +27,11 @@ test("model commands select exact models and report missing models or auth", asy
 
   for (const [name, id] of [
     ["luna", "gpt-6-luna"],
-    ["sol", "gpt-6.1-sol"],
+    ["sol", "gpt-6-sol"],
   ] as const) {
     const command = commands.get(name);
     assert.ok(command);
-    const model = { provider: "openai-codex", id };
+    const model = { provider: "openai", id };
     let available = true;
     const notifications: [string, string | undefined][] = [];
     const ctx = {
@@ -53,7 +53,7 @@ test("model commands select exact models and report missing models or auth", asy
     await command.handler("", ctx);
     assert.equal(selected.at(-1), model);
     assert.deepEqual(notifications.pop(), [
-      `Switched to openai-codex/${id}.`,
+      `Switched to openai/${id}.`,
       "info",
     ]);
 
@@ -61,7 +61,7 @@ test("model commands select exact models and report missing models or auth", asy
     available = false;
     await command.handler("", ctx);
     assert.deepEqual(notifications.pop(), [
-      `Model openai-codex/${id} is not available.`,
+      `Model openai/${id} is not available.`,
       "error",
     ]);
     assert.equal(selected.length, count);
@@ -70,7 +70,7 @@ test("model commands select exact models and report missing models or auth", asy
     authenticated = false;
     await command.handler("", ctx);
     assert.deepEqual(notifications.pop(), [
-      `Unable to authenticate openai-codex/${id}.`,
+      `Unable to authenticate openai/${id}.`,
       "error",
     ]);
     assert.equal(selected.length, count);
