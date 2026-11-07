@@ -101,7 +101,9 @@ async function generateCommitMessage(
 
       return {
         subject: commitMessage,
-        assistedBy: hasUserMessages ? formatModelRef(previousModel) : undefined,
+        assistedBy: hasUserMessages
+          ? `${previousModel.provider}/${previousModel.id}`
+          : undefined,
       };
     }
 
@@ -134,12 +136,14 @@ async function getCommitContexts(
     lastCommitTime,
   );
 
-  const results = entries.filter(isAssistantMessage);
   const prompts = entries.filter(isUserMessage);
+  const results = entries.filter(isAssistantMessage);
   const contexts: { text: string; source: string }[] = [];
 
   const promptText = renderTranscript(prompts);
-  const sessionText = renderTranscript([...prompts, ...results].sort(byTime));
+  const sessionText = renderTranscript(
+    [...prompts, ...results].sort((a, b) => getEntryTime(a) - getEntryTime(b)),
+  );
 
   // Send each user prompt together with the assistant answer that follows it.
   // This gives the model the intent and the result of the work in one context.
@@ -208,12 +212,10 @@ async function askModel(
     },
   );
 
-  const answer = response.content
+  return response.content
     .filter(isTextBlock)
     .map((part) => part.text)
     .join("\n");
-
-  return answer;
 }
 
 async function stageAndCommit(
@@ -237,7 +239,7 @@ async function stageAndCommit(
       return;
     }
 
-    finalCommitMessage = normalizeCommitMessage(edited);
+    finalCommitMessage = edited.replace(/\r\n/g, "\n").trim();
     if (!finalCommitMessage) {
       logger.log("Commit message is empty.", "warning");
       return;
@@ -352,7 +354,7 @@ async function hasChanges(
 }
 
 function renderTranscript(entries: SessionEntry[]): string {
-  return [...entries].map(renderEntry).filter(Boolean).join("\n\n");
+  return entries.map(renderEntry).filter(Boolean).join("\n\n");
 }
 
 function renderEntry(entry: SessionEntry): string {
@@ -386,16 +388,8 @@ function normalizeOneLine(text: string): string {
     .trim();
 }
 
-function normalizeCommitMessage(text: string): string {
-  return text.replace(/\r\n/g, "\n").trim();
-}
-
 function formatCommitMessage(subject: string, assistedBy?: string): string {
   return assistedBy ? `${subject}\n\nAssisted-by: ${assistedBy}` : subject;
-}
-
-function formatModelRef(model: { provider: string; id: string }): string {
-  return `${model.provider}/${model.id}`;
 }
 
 function buildCommitPrompt(contextText: string, source: string): string {
@@ -421,10 +415,6 @@ function section(title: string, body: string): string {
 function truncateText(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text;
   return `${text.slice(0, maxChars)}\n...[truncated]`;
-}
-
-function byTime(a: SessionEntry, b: SessionEntry): number {
-  return getEntryTime(a) - getEntryTime(b);
 }
 
 type UserOrAssistantEntry = SessionEntry & {

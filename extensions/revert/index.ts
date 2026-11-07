@@ -1,7 +1,6 @@
 import type {
   ExtensionAPI,
   ExtensionCommandContext,
-  SessionEntry,
 } from "@earendil-works/pi-coding-agent";
 import { getErrorMessage } from "../../utils/errors.ts";
 import {
@@ -39,40 +38,23 @@ async function rewindSession(
   ctx: ExtensionCommandContext,
   logger: Logger,
 ): Promise<void> {
-  await abortAndWaitForIdle(ctx);
+  abortCurrentTurn(ctx);
+  await ctx.waitForIdle();
 
   await requireGitRepository(pi, ctx);
   await stashChanges(pi, ctx);
 
-  const entry = await findRewindTarget(pi, ctx);
+  const commitTime = await getLastCommitTime(pi, ctx);
+  const entry = findFirstEntryAfterTime(
+    ctx.sessionManager.getBranch(),
+    commitTime,
+  );
   if (!entry) {
     logger.log("There is nothing to rewind.", "info");
     return;
   }
 
-  await navigateToEntry(ctx, entry.id);
-}
-
-async function abortAndWaitForIdle(
-  ctx: ExtensionCommandContext,
-): Promise<void> {
-  abortCurrentTurn(ctx);
-  await ctx.waitForIdle();
-}
-
-async function findRewindTarget(
-  pi: ExtensionAPI,
-  ctx: ExtensionCommandContext,
-): Promise<SessionEntry | undefined> {
-  const commitTime = await getLastCommitTime(pi, ctx);
-  return findFirstEntryAfterTime(ctx.sessionManager.getBranch(), commitTime);
-}
-
-async function navigateToEntry(
-  ctx: ExtensionCommandContext,
-  entryId: string,
-): Promise<void> {
-  const result = await ctx.navigateTree(entryId, { summarize: false });
+  const result = await ctx.navigateTree(entry.id, { summarize: false });
   if (result.cancelled) {
     throw new Error("Revert navigation was cancelled.");
   }

@@ -41,29 +41,12 @@ function findUndoTarget(entries: SessionEntry[]): SessionEntry | undefined {
     return undefined;
   }
 
-  const lastUserMessageIndex = findLastUserMessageIndex(entries);
+  const lastUserMessageIndex = entries.findLastIndex(
+    (entry) => entry.type === "message" && entry.message.role === "user",
+  );
   if (lastUserMessageIndex === -1) {
     return entries[0];
   }
 
   return entries[lastUserMessageIndex - 1] ?? entries[lastUserMessageIndex];
-}
-
-function findLastUserMessageIndex(entries: SessionEntry[]): number {
-  for (let index = entries.length - 1; index >= 0; index -= 1) {
-    if (isUserMessage(entries[index])) {
-      return index;
-    }
-  }
-
-  return -1;
-}
-
-function isUserMessage(
-  entry: SessionEntry | undefined,
-): entry is SessionEntry & {
-  type: "message";
-  message: { role: "user" };
-} {
-  return entry?.type === "message" && entry.message.role === "user";
 }

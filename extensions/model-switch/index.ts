@@ -23,7 +23,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
 
-        if (thinkingLevel) pi.setThinkingLevel(thinkingLevel);
+        pi.setThinkingLevel(thinkingLevel);
         ctx.ui.notify(`Switched to ${modelRef}.`, "info");
       },
     });
