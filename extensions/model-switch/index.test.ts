@@ -64,7 +64,7 @@ test("model commands select exact models and report missing models or auth", asy
     ]);
     assert.deepEqual(
       thinkingLevels.slice(thinkingLevelCount),
-      name === "luna" ? ["low"] : [],
+      name === "luna" ? ["low"] : ["high"],
     );
 
     const count = selected.length;

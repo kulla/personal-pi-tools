@@ -3,8 +3,8 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 export default function (pi: ExtensionAPI) {
   for (const [command, modelId, thinkingLevel] of [
     ["luna", "gpt-6-luna", "low"],
-    ["sol", "gpt-6-sol", undefined],
-    ["astra", "gpt-6-astra", undefined],
+    ["sol", "gpt-6-sol", "high"],
+    ["astra", "gpt-6-astra", "high"],
   ] as const) {
     const provider = "openai";
     const modelRef = `${provider}/${modelId}`;
