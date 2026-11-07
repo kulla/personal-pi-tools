@@ -1,10 +1,10 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 export default function (pi: ExtensionAPI) {
-  for (const [command, modelId] of [
-    ["luna", "gpt-6-luna"],
-    ["sol", "gpt-6-sol"],
-    ["astra", "gpt-6-astra"],
+  for (const [command, modelId, thinkingLevel] of [
+    ["luna", "gpt-6-luna", "low"],
+    ["sol", "gpt-6-sol", undefined],
+    ["astra", "gpt-6-astra", undefined],
   ] as const) {
     const provider = "openai";
     const modelRef = `${provider}/${modelId}`;
@@ -23,6 +23,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
 
+        if (thinkingLevel) pi.setThinkingLevel(thinkingLevel);
         ctx.ui.notify(`Switched to ${modelRef}.`, "info");
       },
     });

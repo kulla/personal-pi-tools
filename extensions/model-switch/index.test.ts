@@ -13,6 +13,7 @@ test("model commands select exact models and report missing models or auth", asy
   >();
   let authenticated = true;
   const selected: unknown[] = [];
+  const thinkingLevels: string[] = [];
   modelSwitch({
     registerCommand(name, command) {
       commands.set(name, command);
@@ -21,6 +22,9 @@ test("model commands select exact models and report missing models or auth", asy
       if (!authenticated) return false;
       selected.push(model);
       return true;
+    },
+    setThinkingLevel(level) {
+      thinkingLevels.push(level);
     },
   } as ExtensionAPI);
   assert.deepEqual([...commands.keys()], ["luna", "sol", "astra"]);
@@ -51,12 +55,17 @@ test("model commands select exact models and report missing models or auth", asy
     } as unknown as ExtensionCommandContext;
 
     authenticated = true;
+    const thinkingLevelCount = thinkingLevels.length;
     await command.handler("", ctx);
     assert.equal(selected.at(-1), model);
     assert.deepEqual(notifications.pop(), [
       `Switched to openai/${id}.`,
       "info",
     ]);
+    assert.deepEqual(
+      thinkingLevels.slice(thinkingLevelCount),
+      name === "luna" ? ["low"] : [],
+    );
 
     const count = selected.length;
     available = false;
