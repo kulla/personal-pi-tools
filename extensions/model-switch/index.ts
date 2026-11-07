@@ -4,6 +4,7 @@ export default function (pi: ExtensionAPI) {
   for (const [command, modelId] of [
     ["luna", "gpt-6-luna"],
     ["sol", "gpt-6-sol"],
+    ["astra", "gpt-6-astra"],
   ] as const) {
     const provider = "openai";
     const modelRef = `${provider}/${modelId}`;

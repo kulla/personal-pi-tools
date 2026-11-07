@@ -23,11 +23,12 @@ test("model commands select exact models and report missing models or auth", asy
       return true;
     },
   } as ExtensionAPI);
-  assert.deepEqual([...commands.keys()], ["luna", "sol"]);
+  assert.deepEqual([...commands.keys()], ["luna", "sol", "astra"]);
 
   for (const [name, id] of [
     ["luna", "gpt-6-luna"],
     ["sol", "gpt-6-sol"],
+    ["astra", "gpt-6-astra"],
   ] as const) {
     const command = commands.get(name);
     assert.ok(command);
