@@ -58,6 +58,7 @@ async function generateCommitMessage(
 ): Promise<{ subject: string; assistedBy?: string } | null> {
   const { contexts, hasUserMessages } = await getCommitContexts(pi, ctx);
   const previousModel = ctx.model;
+  const previousThinkingLevel = pi.getThinkingLevel();
   if (!previousModel) {
     logger.log("No active model is available.", "error");
     return null;
@@ -83,6 +84,7 @@ async function generateCommitMessage(
       );
       return null;
     }
+    pi.setThinkingLevel("low");
 
     for (const context of contexts) {
       const prompt = buildCommitPrompt(context.text, context.source);
@@ -115,6 +117,7 @@ async function generateCommitMessage(
         "error",
       );
     }
+    pi.setThinkingLevel(previousThinkingLevel);
   }
 }
 
