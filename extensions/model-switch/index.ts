@@ -2,7 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 export default function (pi: ExtensionAPI) {
   for (const [command, modelId, thinkingLevel] of [
-    ["luna", "gpt-6-luna", "low"],
+    ["luna", "gpt-6-luna", "high"],
     ["sol", "gpt-6-sol", "high"],
     ["astra", "gpt-6-astra", "high"],
   ] as const) {

@@ -62,10 +62,7 @@ test("model commands select exact models and report missing models or auth", asy
       `Switched to openai/${id}.`,
       "info",
     ]);
-    assert.deepEqual(
-      thinkingLevels.slice(thinkingLevelCount),
-      name === "luna" ? ["low"] : ["high"],
-    );
+    assert.deepEqual(thinkingLevels.slice(thinkingLevelCount), ["high"]);
 
     const count = selected.length;
     available = false;
