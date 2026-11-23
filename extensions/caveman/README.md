@@ -7,7 +7,7 @@ Adds concise, technical caveman-style instructions as a structured prompt sectio
 ## Check
 
 ```bash
-node --test extensions/caveman/index.test.ts
+node --test extensions/caveman/index.spec.ts
 ```
 
 ## Source

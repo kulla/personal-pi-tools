@@ -22,5 +22,5 @@ Loads files and directory listings referenced with `@path` before each agent tur
 ## Tests
 
 ```bash
-bun test extensions/path/index.test.ts
+bun test extensions/path/index.spec.ts
 ```
