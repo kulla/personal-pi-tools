@@ -6,7 +6,7 @@ import type { ImageContent, TextContent } from "@earendil-works/pi-ai"
 import { createReadTool, type ExtensionAPI } from "@earendil-works/pi-coding-agent"
 
 const REFERENCE_PATTERN = /(?<![\w@/:\\])@([^\s"'`<>]+)/gu
-const TRAILING_PUNCTUATION = /[.,;:!?\]\)}]+$/gu
+const TRAILING_PUNCTUATION = /[.,;:!?\])}]+$/gu
 const MAX_ERROR_LENGTH = 200
 const MAX_DIRECTORY_ENTRIES = 200
 

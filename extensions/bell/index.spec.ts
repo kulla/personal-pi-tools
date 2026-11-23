@@ -1,4 +1,4 @@
-import { mock, test } from "bun:test"
+import { spyOn, test } from "bun:test"
 import assert from "node:assert/strict"
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent"
@@ -15,9 +15,7 @@ test("bell rings once only after interactive agent settles", () => {
   } as unknown as ExtensionAPI)
   assert.ok(onSettled)
 
-  const write = mock((_text: string) => true)
-  const originalWrite = process.stdout.write
-  process.stdout.write = write as typeof originalWrite
+  const write = spyOn(process.stdout, "write").mockImplementation((_text: string) => true)
   try {
     for (const mode of ["print", "json", "rpc", "tui"] as const) {
       onSettled({}, { mode } as ExtensionContext)
@@ -25,6 +23,6 @@ test("bell rings once only after interactive agent settles", () => {
     assert.equal(write.mock.calls.length, 1)
     assert.equal(write.mock.calls[0]?.[0], "\x07")
   } finally {
-    process.stdout.write = originalWrite
+    write.mockRestore()
   }
 })
