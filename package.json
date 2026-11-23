@@ -22,6 +22,7 @@
     "@tsconfig/recommended": "^1.0.14",
     "oxfmt": "^0.71.0",
     "oxlint": "^1.86.0",
+    "oxlint-tsgolint": "^7.0.2008",
     "typescript": "^7.0.2"
   }
 }
