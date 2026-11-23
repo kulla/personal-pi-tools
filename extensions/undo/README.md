@@ -8,9 +8,3 @@ Aborts the current pi turn, waits for idle, and rewinds to the message before th
 
 - Aborts the active turn if one is running.
 - Navigates to the entry before the last user message without generating a summary. If none exists, navigates to the first entry; if the last user message is the first entry, stays there.
-
-## Check
-
-```bash
-bun test extensions/undo/index.spec.ts
-```

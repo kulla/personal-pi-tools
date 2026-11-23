@@ -9,9 +9,3 @@ All three commands use Pi’s model registry and authentication. Models must alr
 Switching preserves conversation history and uses Pi’s normal model-switch behavior and default-model persistence. All three commands set thinking level to `high`. No prompt or tools are changed by this extension.
 
 Run `/reload` after installing or updating the extension.
-
-## Check
-
-```bash
-bun test extensions/model-switch/index.spec.ts
-```

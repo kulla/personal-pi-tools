@@ -18,9 +18,3 @@ Loads files and directory listings referenced with `@path` before each agent tur
 - Converts failed reads into short context errors without blocking other files.
 - Does not resolve references found inside loaded files.
 - Ignores URLs and glob patterns.
-
-## Tests
-
-```bash
-bun test extensions/path/index.spec.ts
-```
