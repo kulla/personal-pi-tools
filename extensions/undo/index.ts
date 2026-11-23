@@ -1,52 +1,46 @@
-import type {
-  ExtensionAPI,
-  SessionEntry,
-} from "@earendil-works/pi-coding-agent";
-import { getErrorMessage } from "../../utils/errors.ts";
-import { createLogger } from "../../utils/logging.ts";
-import { abortCurrentTurn } from "../../utils/session.ts";
+import type { ExtensionAPI, SessionEntry } from "@earendil-works/pi-coding-agent"
+
+import { getErrorMessage } from "../../utils/errors.ts"
+import { createLogger } from "../../utils/logging.ts"
+import { abortCurrentTurn } from "../../utils/session.ts"
 
 export default function (pi: ExtensionAPI) {
-  const logger = createLogger(pi);
+  const logger = createLogger(pi)
 
   pi.registerCommand("undo", {
-    description:
-      "Abort the current turn and rewind to the message before the last user message",
+    description: "Abort the current turn and rewind to the message before the last user message",
     handler: async (_args, ctx) => {
       try {
-        abortCurrentTurn(ctx);
-        await ctx.waitForIdle();
+        abortCurrentTurn(ctx)
+        await ctx.waitForIdle()
 
-        const target = findUndoTarget(ctx.sessionManager.getBranch());
+        const target = findUndoTarget(ctx.sessionManager.getBranch())
         if (!target) {
-          return;
+          return
         }
 
-        const result = await ctx.navigateTree(target.id, { summarize: false });
+        const result = await ctx.navigateTree(target.id, { summarize: false })
         if (result.cancelled) {
-          throw new Error("Undo navigation was cancelled.");
+          throw new Error("Undo navigation was cancelled.")
         }
       } catch (error) {
-        logger.log(
-          getErrorMessage(error, "Unable to undo the current turn."),
-          "error",
-        );
+        logger.log(getErrorMessage(error, "Unable to undo the current turn."), "error")
       }
     },
-  });
+  })
 }
 
 function findUndoTarget(entries: SessionEntry[]): SessionEntry | undefined {
   if (entries.length === 0) {
-    return undefined;
+    return undefined
   }
 
   const lastUserMessageIndex = entries.findLastIndex(
     (entry) => entry.type === "message" && entry.message.role === "user",
-  );
+  )
   if (lastUserMessageIndex === -1) {
-    return entries[0];
+    return entries[0]
   }
 
-  return entries[lastUserMessageIndex - 1] ?? entries[lastUserMessageIndex];
+  return entries[lastUserMessageIndex - 1] ?? entries[lastUserMessageIndex]
 }

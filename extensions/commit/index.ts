@@ -1,53 +1,52 @@
-import { readFile, stat } from "node:fs/promises";
-import { join } from "node:path";
+import { readFile, stat } from "node:fs/promises"
+import { join } from "node:path"
+
 import type {
   ExtensionAPI,
   ExtensionCommandContext,
   SessionEntry,
-} from "@earendil-works/pi-coding-agent";
-import { getErrorMessage } from "../../utils/errors.ts";
-import { getLastCommitTime, git, gitText } from "../../utils/git.ts";
-import { createLogger, type Logger } from "../../utils/logging.ts";
-import { getCommandErrorMessage } from "../../utils/process.ts";
-import { getEntriesAfterTime, getEntryTime } from "../../utils/session.ts";
+} from "@earendil-works/pi-coding-agent"
 
-const GIT_SOURCE = "git status, diffs, and untracked files";
-const INSUFFICIENT_CONTEXT_RESPONSE = "CONTEXT_NOT_ENOUGH";
-const GIT_CONTEXT_TOTAL_MAX_CHARS = 5_000;
-const AI_MESSAGE_LOG_MAX_CHARS = 500;
-const UNTRACKED_FILE_LIMIT = 10;
-const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400;
-const COMMIT_MODEL_PROVIDER = "openai";
-const COMMIT_MODEL_ID = "gpt-6-luna";
+import { getErrorMessage } from "../../utils/errors.ts"
+import { getLastCommitTime, git, gitText } from "../../utils/git.ts"
+import { createLogger, type Logger } from "../../utils/logging.ts"
+import { getCommandErrorMessage } from "../../utils/process.ts"
+import { getEntriesAfterTime, getEntryTime } from "../../utils/session.ts"
+
+const GIT_SOURCE = "git status, diffs, and untracked files"
+const INSUFFICIENT_CONTEXT_RESPONSE = "CONTEXT_NOT_ENOUGH"
+const GIT_CONTEXT_TOTAL_MAX_CHARS = 5_000
+const AI_MESSAGE_LOG_MAX_CHARS = 500
+const UNTRACKED_FILE_LIMIT = 10
+const UNTRACKED_FILE_SUMMARY_MAX_CHARS = 400
+const COMMIT_MODEL_PROVIDER = "openai"
+const COMMIT_MODEL_ID = "gpt-6-luna"
 
 export default function (pi: ExtensionAPI) {
-  const logger = createLogger(pi);
+  const logger = createLogger(pi)
 
   pi.registerCommand("commit", {
     description: "Generate an editable conventional commit template",
     handler: async (_args, ctx) => {
       if (!(await isGitRepo(pi, ctx))) {
-        logger.log("Not inside a git repository.", "error");
-        return;
+        logger.log("Not inside a git repository.", "error")
+        return
       }
 
       if (!(await hasChanges(pi, ctx))) {
-        logger.log("No changes to commit.", "warning");
-        return;
+        logger.log("No changes to commit.", "warning")
+        return
       }
 
-      const commitDraft = await generateCommitMessage(pi, ctx, logger);
+      const commitDraft = await generateCommitMessage(pi, ctx, logger)
       if (!commitDraft) {
-        logger.log(
-          `Unable to generate a commit message with the active model.`,
-          "error",
-        );
-        return;
+        logger.log(`Unable to generate a commit message with the active model.`, "error")
+        return
       }
 
-      await stageAndCommit(pi, ctx, commitDraft, logger);
+      await stageAndCommit(pi, ctx, commitDraft, logger)
     },
-  });
+  })
 }
 
 async function generateCommitMessage(
@@ -55,118 +54,96 @@ async function generateCommitMessage(
   ctx: ExtensionCommandContext,
   logger: Logger,
 ): Promise<{ subject: string; assistedBy?: string } | null> {
-  const { contexts, hasUserMessages } = await getCommitContexts(pi, ctx);
-  const sessionModel = ctx.model;
+  const { contexts, hasUserMessages } = await getCommitContexts(pi, ctx)
+  const sessionModel = ctx.model
   if (!sessionModel) {
-    logger.log("No active model is available.", "error");
-    return null;
+    logger.log("No active model is available.", "error")
+    return null
   }
 
-  const commitModel = ctx.modelRegistry.find(
-    COMMIT_MODEL_PROVIDER,
-    COMMIT_MODEL_ID,
-  );
+  const commitModel = ctx.modelRegistry.find(COMMIT_MODEL_PROVIDER, COMMIT_MODEL_ID)
   if (!commitModel) {
     logger.log(
       `Commit model ${COMMIT_MODEL_PROVIDER}/${COMMIT_MODEL_ID} is not available.`,
       "error",
-    );
-    return null;
+    )
+    return null
   }
 
   for (const context of contexts) {
-    const prompt = buildCommitPrompt(context.text, context.source);
+    const prompt = buildCommitPrompt(context.text, context.source)
     logger.log(
       `Generate commit (${context.source}):\n${truncateText(context.text, AI_MESSAGE_LOG_MAX_CHARS)}`,
       "info",
-    );
+    )
     const response = await ctx.modelRegistry
       .streamSimple(
         commitModel,
         {
           messages: [
-            {
-              role: "user",
-              content: [{ type: "text", text: prompt }],
-              timestamp: Date.now(),
-            },
+            { role: "user", content: [{ type: "text", text: prompt }], timestamp: Date.now() },
           ],
         },
         { reasoning: "low", signal: ctx.signal },
       )
-      .result();
-    if (response.stopReason === "error" || response.stopReason === "aborted")
-      return null;
+      .result()
+    if (response.stopReason === "error" || response.stopReason === "aborted") return null
     const commitMessage = normalizeOneLine(
       response.content
         .filter(isTextBlock)
         .map((part) => part.text)
         .join("\n"),
-    );
-    if (!commitMessage || isContextNotEnough(commitMessage)) continue;
+    )
+    if (!commitMessage || isContextNotEnough(commitMessage)) continue
 
     return {
       subject: commitMessage,
-      assistedBy: hasUserMessages
-        ? `${sessionModel.provider}/${sessionModel.id}`
-        : undefined,
-    };
+      assistedBy: hasUserMessages ? `${sessionModel.provider}/${sessionModel.id}` : undefined,
+    }
   }
 
-  return null;
+  return null
 }
 
 async function getCommitContexts(
   pi: ExtensionAPI,
   ctx: ExtensionCommandContext,
-): Promise<{
-  contexts: { text: string; source: string }[];
-  hasUserMessages: boolean;
-}> {
-  const lastCommitTime = await getLastCommitTime(pi, ctx);
-  const entries = getEntriesAfterTime(
-    ctx.sessionManager.getBranch(),
-    lastCommitTime,
-  );
+): Promise<{ contexts: { text: string; source: string }[]; hasUserMessages: boolean }> {
+  const lastCommitTime = await getLastCommitTime(pi, ctx)
+  const entries = getEntriesAfterTime(ctx.sessionManager.getBranch(), lastCommitTime)
 
-  const prompts = entries.filter(isUserMessage);
-  const results = entries.filter(isAssistantMessage);
-  const contexts: { text: string; source: string }[] = [];
+  const prompts = entries.filter(isUserMessage)
+  const results = entries.filter(isAssistantMessage)
+  const contexts: { text: string; source: string }[] = []
 
-  const promptText = renderTranscript(prompts);
+  const promptText = renderTranscript(prompts)
   const sessionText = renderTranscript(
     [...prompts, ...results].sort((a, b) => getEntryTime(a) - getEntryTime(b)),
-  );
+  )
 
   // Send each user prompt together with the assistant answer that follows it.
   // This gives the model the intent and the result of the work in one context.
   if (sessionText) {
-    contexts.push({
-      text: sessionText,
-      source: "session user prompts and assistant answers",
-    });
+    contexts.push({ text: sessionText, source: "session user prompts and assistant answers" })
   }
 
   if (promptText && sessionText !== promptText) {
-    contexts.push({ text: promptText, source: "session user prompts" });
+    contexts.push({ text: promptText, source: "session user prompts" })
   }
 
-  contexts.push({ text: await getGitContext(pi, ctx), source: GIT_SOURCE });
-  return {
-    contexts,
-    hasUserMessages: prompts.length > 0,
-  };
+  contexts.push({ text: await getGitContext(pi, ctx), source: GIT_SOURCE })
+  return { contexts, hasUserMessages: prompts.length > 0 }
 }
 
 function isContextNotEnough(text: string): boolean {
-  const normalized = text.toUpperCase().replace(/[^A-Z]+/g, "");
+  const normalized = text.toUpperCase().replace(/[^A-Z]+/g, "")
   return (
     normalized === "CONTEXTNOTENOUGH" ||
     normalized === "CONTEXTISNOTENOUGH" ||
     normalized === "NOTENOUGHCONTEXT" ||
     normalized === "NEEDMORECONTEXT" ||
     normalized === "MORECONTEXTNEEDED"
-  );
+  )
 }
 
 async function stageAndCommit(
@@ -175,68 +152,57 @@ async function stageAndCommit(
   commitDraft: { subject: string; assistedBy?: string },
   logger: Logger,
 ): Promise<void> {
-  let finalCommitMessage = formatCommitMessage(
-    commitDraft.subject,
-    commitDraft.assistedBy,
-  );
+  let finalCommitMessage = formatCommitMessage(commitDraft.subject, commitDraft.assistedBy)
 
   if (ctx.hasUI) {
-    const edited = await ctx.ui.editor(
-      "Edit commit message",
-      finalCommitMessage,
-    );
+    const edited = await ctx.ui.editor("Edit commit message", finalCommitMessage)
     if (edited === undefined) {
-      logger.log("Commit was cancelled.", "warning");
-      return;
+      logger.log("Commit was cancelled.", "warning")
+      return
     }
 
-    finalCommitMessage = edited.replace(/\r\n/g, "\n").trim();
+    finalCommitMessage = edited.replace(/\r\n/g, "\n").trim()
     if (!finalCommitMessage) {
-      logger.log("Commit message is empty.", "warning");
-      return;
+      logger.log("Commit message is empty.", "warning")
+      return
     }
   }
 
-  const add = await git(pi, ctx, ["add", "-A"]);
+  const add = await git(pi, ctx, ["add", "-A"])
   if (add.code !== 0) {
     logger.log(
       `Failed to stage changes for commit: ${getCommandErrorMessage(add, "unknown error")}`,
       "error",
-    );
-    return;
+    )
+    return
   }
 
-  const commit = await git(pi, ctx, ["commit", "-m", finalCommitMessage]);
+  const commit = await git(pi, ctx, ["commit", "-m", finalCommitMessage])
   if (commit.code === 0) {
-    logger.log("Git commit commpleted");
+    logger.log("Git commit commpleted")
   } else {
-    logger.log("Error in running git commit.", "error");
+    logger.log("Error in running git commit.", "error")
   }
 }
 
-async function getGitContext(
-  pi: ExtensionAPI,
-  ctx: ExtensionCommandContext,
-): Promise<string> {
+async function getGitContext(pi: ExtensionAPI, ctx: ExtensionCommandContext): Promise<string> {
   const [status, stagedDiff, diff] = await Promise.all([
     gitText(pi, ctx, ["status", "--porcelain"]),
     gitText(pi, ctx, ["diff", "--cached", "--no-ext-diff", "--no-color"]),
     gitText(pi, ctx, ["diff", "--no-ext-diff", "--no-color"]),
-  ]);
-  const untracked = await summarizeUntrackedFiles(ctx, status);
+  ])
+  const untracked = await summarizeUntrackedFiles(ctx, status)
 
   const gitContext = [
     section("Git status", status || "[clean]"),
     section("Staged diff", stagedDiff || "[no staged diff]"),
     section("Working tree diff", diff || "[no diff]"),
-    untracked.length > 0
-      ? section("Untracked files", untracked.join("\n---\n"))
-      : "",
+    untracked.length > 0 ? section("Untracked files", untracked.join("\n---\n")) : "",
   ]
     .filter(Boolean)
-    .join("\n\n");
+    .join("\n\n")
 
-  return truncateText(gitContext, GIT_CONTEXT_TOTAL_MAX_CHARS);
+  return truncateText(gitContext, GIT_CONTEXT_TOTAL_MAX_CHARS)
 }
 
 async function summarizeUntrackedFiles(
@@ -247,100 +213,82 @@ async function summarizeUntrackedFiles(
     .split(/\r?\n/)
     .filter((line) => line.startsWith("?? "))
     .map((line) => line.slice(3).trim())
-    .filter(Boolean);
+    .filter(Boolean)
 
-  const summaries: string[] = [];
+  const summaries: string[] = []
   for (const file of files.slice(0, UNTRACKED_FILE_LIMIT)) {
-    summaries.push(
-      truncateText(
-        await summarizeFile(ctx, file),
-        UNTRACKED_FILE_SUMMARY_MAX_CHARS,
-      ),
-    );
+    summaries.push(truncateText(await summarizeFile(ctx, file), UNTRACKED_FILE_SUMMARY_MAX_CHARS))
   }
 
   if (files.length > UNTRACKED_FILE_LIMIT) {
-    summaries.push(
-      `[${files.length - UNTRACKED_FILE_LIMIT} more untracked file(s) omitted]`,
-    );
+    summaries.push(`[${files.length - UNTRACKED_FILE_LIMIT} more untracked file(s) omitted]`)
   }
 
-  return summaries;
+  return summaries
 }
 
-async function summarizeFile(
-  ctx: ExtensionCommandContext,
-  file: string,
-): Promise<string> {
+async function summarizeFile(ctx: ExtensionCommandContext, file: string): Promise<string> {
   try {
-    const path = join(ctx.cwd, file);
-    const fileStat = await stat(path);
-    if (fileStat.size > 200_000) return `File: ${file}\n[too large to include]`;
+    const path = join(ctx.cwd, file)
+    const fileStat = await stat(path)
+    if (fileStat.size > 200_000) return `File: ${file}\n[too large to include]`
 
-    const text = (await readFile(path, "utf8")).trim();
-    if (!text) return `File: ${file}\n[empty or binary file]`;
+    const text = (await readFile(path, "utf8")).trim()
+    if (!text) return `File: ${file}\n[empty or binary file]`
 
-    const snippet = truncateText(text, UNTRACKED_FILE_SUMMARY_MAX_CHARS);
-    return `File: ${file}\n${snippet}`;
+    const snippet = truncateText(text, UNTRACKED_FILE_SUMMARY_MAX_CHARS)
+    return `File: ${file}\n${snippet}`
   } catch (error) {
-    return `File: ${file}\n[${getErrorMessage(error, "unable to read file contents")}]`;
+    return `File: ${file}\n[${getErrorMessage(error, "unable to read file contents")}]`
   }
 }
 
-async function isGitRepo(
-  pi: ExtensionAPI,
-  ctx: ExtensionCommandContext,
-): Promise<boolean> {
-  return (
-    (await gitText(pi, ctx, ["rev-parse", "--is-inside-work-tree"])) === "true"
-  );
+async function isGitRepo(pi: ExtensionAPI, ctx: ExtensionCommandContext): Promise<boolean> {
+  return (await gitText(pi, ctx, ["rev-parse", "--is-inside-work-tree"])) === "true"
 }
 
-async function hasChanges(
-  pi: ExtensionAPI,
-  ctx: ExtensionCommandContext,
-): Promise<boolean> {
-  const status = await gitText(pi, ctx, ["status", "--porcelain"]);
-  return status.trim().length > 0;
+async function hasChanges(pi: ExtensionAPI, ctx: ExtensionCommandContext): Promise<boolean> {
+  const status = await gitText(pi, ctx, ["status", "--porcelain"])
+  return status.trim().length > 0
 }
 
 function renderTranscript(entries: SessionEntry[]): string {
-  return entries.map(renderEntry).filter(Boolean).join("\n\n");
+  return entries.map(renderEntry).filter(Boolean).join("\n\n")
 }
 
 function renderEntry(entry: SessionEntry): string {
-  if (!isUserMessage(entry) && !isAssistantMessage(entry)) return "";
+  if (!isUserMessage(entry) && !isAssistantMessage(entry)) return ""
 
-  const label = isUserMessage(entry) ? "User" : "Assistant";
-  const text = extractText(entry.message.content);
-  return text ? `${label}: ${text}` : "";
+  const label = isUserMessage(entry) ? "User" : "Assistant"
+  const text = extractText(entry.message.content)
+  return text ? `${label}: ${text}` : ""
 }
 
 function extractText(content: unknown): string {
-  if (typeof content === "string") return content.trim();
-  if (!Array.isArray(content)) return "";
+  if (typeof content === "string") return content.trim()
+  if (!Array.isArray(content)) return ""
 
   return content
     .filter(isTextBlock)
     .map((block) => block.text.trim())
     .filter(Boolean)
-    .join("\n");
+    .join("\n")
 }
 
 function normalizeOneLine(text: string): string {
   const line = text
     .split(/\r?\n/)
     .map((part) => part.trim())
-    .find((part) => part && !part.startsWith("```"));
+    .find((part) => part && !part.startsWith("```"))
 
   return (line ?? "")
     .replace(/^commit message:\s*/i, "")
     .replace(/^['"`]+|['"`]+$/g, "")
-    .trim();
+    .trim()
 }
 
 function formatCommitMessage(subject: string, assistedBy?: string): string {
-  return assistedBy ? `${subject}\n\nAssisted-by: ${assistedBy}` : subject;
+  return assistedBy ? `${subject}\n\nAssisted-by: ${assistedBy}` : subject
 }
 
 function buildCommitPrompt(contextText: string, source: string): string {
@@ -356,35 +304,33 @@ function buildCommitPrompt(contextText: string, source: string): string {
     "<context>",
     contextText,
     "</context>",
-  ].join("\n");
+  ].join("\n")
 }
 
 function section(title: string, body: string): string {
-  return `${title}:\n${body}`;
+  return `${title}:\n${body}`
 }
 
 function truncateText(text: string, maxChars: number): string {
-  if (text.length <= maxChars) return text;
-  return `${text.slice(0, maxChars)}\n...[truncated]`;
+  if (text.length <= maxChars) return text
+  return `${text.slice(0, maxChars)}\n...[truncated]`
 }
 
 type UserOrAssistantEntry = SessionEntry & {
-  type: "message";
-  message: { role: "user" | "assistant"; content: unknown };
-};
+  type: "message"
+  message: { role: "user" | "assistant"; content: unknown }
+}
 
 function isAssistantMessage(
   entry: SessionEntry,
-): entry is UserOrAssistantEntry & {
-  message: { role: "assistant"; content: unknown };
-} {
-  return entry.type === "message" && entry.message.role === "assistant";
+): entry is UserOrAssistantEntry & { message: { role: "assistant"; content: unknown } } {
+  return entry.type === "message" && entry.message.role === "assistant"
 }
 
-function isUserMessage(entry: SessionEntry): entry is UserOrAssistantEntry & {
-  message: { role: "user"; content: unknown };
-} {
-  return entry.type === "message" && entry.message.role === "user";
+function isUserMessage(
+  entry: SessionEntry,
+): entry is UserOrAssistantEntry & { message: { role: "user"; content: unknown } } {
+  return entry.type === "message" && entry.message.role === "user"
 }
 
 function isTextBlock(block: unknown): block is { type: "text"; text: string } {
@@ -395,5 +341,5 @@ function isTextBlock(block: unknown): block is { type: "text"; text: string } {
     (block as { type?: unknown }).type === "text" &&
     "text" in block &&
     typeof (block as { text?: unknown }).text === "string"
-  );
+  )
 }
