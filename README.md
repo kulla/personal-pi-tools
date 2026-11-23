@@ -10,6 +10,10 @@ pi install git:github.com/kulla/personal-pi-tools
 
 ## Extensions
 
+### Bell
+
+Rings the terminal bell when an agent run settles and Pi is ready for input.
+
 ### /luna and /sol
 
 Switches to `openai-codex/gpt-6-luna` or `openai-codex/gpt-6.1-sol` while preserving conversation history. Uses existing Pi model registration and authentication.
