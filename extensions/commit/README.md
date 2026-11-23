@@ -10,9 +10,3 @@ Generates a one-line conventional commit subject from the current pi session and
 - Calls `openai/gpt-6-luna` through Pi's model registry with low reasoning for one conventional-commit subject, without changing the session model or thinking level.
 - If the subject is valid, opens Pi's editor with the generated message; the user can edit it before staging all changes and running `git commit`.
 - Adds `Assisted-by: provider/modelId` when the current session has user prompts.
-
-## Check
-
-```bash
-bun test extensions/commit/index.spec.ts
-```

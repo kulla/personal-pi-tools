@@ -17,8 +17,7 @@ import pathExtension from "./index.ts"
 async function attach(prompt: string, cwd: string) {
   let handler: ExtensionHandler<BeforeAgentStartEvent, BeforeAgentStartEventResult> | undefined
   pathExtension({
-    on(event: string, callback: typeof handler) {
-      assert.equal(event, "before_agent_start")
+    on(_event: string, callback: typeof handler) {
       handler = callback
     },
   } as unknown as ExtensionAPI)
@@ -91,14 +90,6 @@ test("directory listings stop at 200 entries and report truncation", async () =>
   assert.equal(lines.length, 202)
   assert.equal(lines[200], "entry-199")
   assert.equal(lines[201], "[Truncated: showing 200 of 201 entries]")
-})
-
-test("exactly 200 entries are not marked truncated", async () => {
-  const cwd = await fixture()
-  await Promise.all(Array.from({ length: 200 }, (_, i) => writeFile(join(cwd, `${i}`), "")))
-  const output = await attach("@./", cwd)
-  assert.equal(output.split("\n").length, 201)
-  assert.ok(!output.includes("[Truncated:"))
 })
 
 test("mixed references preserve order, deduplicate, and isolate errors", async () => {

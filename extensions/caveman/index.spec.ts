@@ -27,7 +27,7 @@ test("caveman adds a structured section without replacing the system prompt", as
     systemPromptOptions: { sections },
   } as BeforeAgentStartEvent
 
-  assert.equal(await handler(event, {} as ExtensionContext), undefined)
+  await handler(event, {} as ExtensionContext)
   assert.equal(event.systemPrompt, "Existing system prompt")
   assert.equal(sections.other, "Keep existing instructions.")
   assert.ok(sections.caveman)

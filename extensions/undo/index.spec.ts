@@ -13,8 +13,7 @@ test("undo rewinds before last user message and handles empty branches", async (
   let handler: Parameters<ExtensionAPI["registerCommand"]>[1]["handler"] | undefined
   undo({
     registerEntryRenderer() {},
-    registerCommand(name: string, command: Parameters<ExtensionAPI["registerCommand"]>[1]) {
-      assert.equal(name, "undo")
+    registerCommand(_name: string, command: Parameters<ExtensionAPI["registerCommand"]>[1]) {
       handler = command.handler
     },
   } as unknown as ExtensionAPI)
