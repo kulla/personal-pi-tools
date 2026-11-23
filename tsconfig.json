@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.schemastore.org/tsconfig",
-  "extends": "@tsconfig/recommended/tsconfig.json",
-  "compilerOptions": { "lib": ["esnext"], "allowImportingTsExtensions": true },
+  "extends": "@tsconfig/bun/tsconfig.json",
+  "compilerOptions": { "lib": ["esnext"], "allowImportingTsExtensions": true, "types": ["bun"] },
   "include": ["extensions/**/*.ts", "utils/**/*.ts"]
 }

@@ -14,5 +14,5 @@ Generates a one-line conventional commit subject from the current pi session and
 ## Check
 
 ```bash
-node --test extensions/commit/index.spec.ts
+bun test extensions/commit/index.spec.ts
 ```

@@ -12,5 +12,5 @@ Aborts the current pi turn, waits for idle, and rewinds to the message before th
 ## Check
 
 ```bash
-node --test extensions/undo/index.spec.ts
+bun test extensions/undo/index.spec.ts
 ```

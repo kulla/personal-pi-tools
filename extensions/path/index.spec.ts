@@ -1,8 +1,8 @@
+import { onTestFinished, test } from "bun:test"
 import assert from "node:assert/strict"
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { type TestContext, test } from "node:test"
 
 import type {
   BeforeAgentStartEvent,
@@ -50,14 +50,14 @@ test("custom-message runs do not load file references", async () => {
   assert.equal(result, undefined)
 })
 
-async function fixture(t: TestContext) {
+async function fixture() {
   const cwd = await mkdtemp(join(tmpdir(), "pi-path-test-"))
-  t.after(() => rm(cwd, { recursive: true, force: true }))
+  onTestFinished(() => rm(cwd, { recursive: true, force: true }))
   return cwd
 }
 
-test("directory listings are shallow, directories-first, and include dotfiles", async (t) => {
-  const cwd = await fixture(t)
+test("directory listings are shallow, directories-first, and include dotfiles", async () => {
+  const cwd = await fixture()
   await mkdir(join(cwd, "attached", "z-dir"), { recursive: true })
   await mkdir(join(cwd, "attached", "a-dir"))
   await writeFile(join(cwd, "attached", "z-dir", "nested.txt"), "nested secret")
@@ -72,16 +72,16 @@ test("directory listings are shallow, directories-first, and include dotfiles", 
   )
 })
 
-test("empty directories and absolute directory symlinks work", async (t) => {
-  const cwd = await fixture(t)
+test("empty directories and absolute directory symlinks work", async () => {
+  const cwd = await fixture()
   await mkdir(join(cwd, "empty"))
   const link = join(cwd, "link")
   await symlink("empty", link)
   assert.equal(await attach(`@${link}`, cwd), `Directory: ${link}\n(empty directory)`)
 })
 
-test("directory listings stop at 200 entries and report truncation", async (t) => {
-  const cwd = await fixture(t)
+test("directory listings stop at 200 entries and report truncation", async () => {
+  const cwd = await fixture()
   await Promise.all(
     Array.from({ length: 201 }, (_, i) =>
       writeFile(join(cwd, `entry-${String(i).padStart(3, "0")}`), "secret"),
@@ -93,16 +93,16 @@ test("directory listings stop at 200 entries and report truncation", async (t) =
   assert.equal(lines[201], "[Truncated: showing 200 of 201 entries]")
 })
 
-test("exactly 200 entries are not marked truncated", async (t) => {
-  const cwd = await fixture(t)
+test("exactly 200 entries are not marked truncated", async () => {
+  const cwd = await fixture()
   await Promise.all(Array.from({ length: 200 }, (_, i) => writeFile(join(cwd, `${i}`), "")))
   const output = await attach("@./", cwd)
   assert.equal(output.split("\n").length, 201)
   assert.ok(!output.includes("[Truncated:"))
 })
 
-test("mixed references preserve order, deduplicate, and isolate errors", async (t) => {
-  const cwd = await fixture(t)
+test("mixed references preserve order, deduplicate, and isolate errors", async () => {
+  const cwd = await fixture()
   await writeFile(join(cwd, "file.txt"), "file contents")
   await mkdir(join(cwd, "empty"))
   const output = await attach("@file.txt @missing @empty @file.txt", cwd)

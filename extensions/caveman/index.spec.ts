@@ -1,5 +1,5 @@
+import { test } from "bun:test"
 import assert from "node:assert/strict"
-import { test } from "node:test"
 
 import type {
   BeforeAgentStartEvent,
@@ -30,5 +30,6 @@ test("caveman adds a structured section without replacing the system prompt", as
   assert.equal(await handler(event, {} as ExtensionContext), undefined)
   assert.equal(event.systemPrompt, "Existing system prompt")
   assert.equal(sections.other, "Keep existing instructions.")
+  assert.ok(sections.caveman)
   assert.match(sections.caveman, /Respond like smart caveman/)
 })

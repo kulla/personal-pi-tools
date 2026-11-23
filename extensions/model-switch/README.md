@@ -13,5 +13,5 @@ Run `/reload` after installing or updating the extension.
 ## Check
 
 ```bash
-node --test extensions/model-switch/index.spec.ts
+bun test extensions/model-switch/index.spec.ts
 ```
