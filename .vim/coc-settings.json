@@ -1,6 +1,13 @@
 {
-  "biome.enable": true,
-  "editor.codeActionsOnSave": { "source.fixAll.biome": true },
+  "biome.enable": false,
   "eslint.validate": [],
-  "prettier.enable": false
+  "prettier.enable": false,
+  "tsserver.enable": false,
+  "languageserver": {
+    "tsgo": {
+      "command": "bun",
+      "args": ["tsc", "--lsp", "--stdio"],
+      "filetypes": ["typescript", "javascript", "typescriptreact", "javascriptreact"]
+    }
+  }
 }
