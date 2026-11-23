@@ -2,7 +2,13 @@
 
 **Implementation:** `extensions/caveman/index.ts`
 
-Adds a concise, technical caveman-style prompt to every agent turn.
+Adds concise, technical caveman-style instructions as a structured prompt section on every agent turn, without replacing Pi's system prompt. Explicit forced system prompts override structured sections.
+
+## Check
+
+```bash
+node --test extensions/caveman/index.test.ts
+```
 
 ## Source
 

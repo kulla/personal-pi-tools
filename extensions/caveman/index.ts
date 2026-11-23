@@ -8,7 +8,7 @@ const CAVEMAN_PROMPT = `Respond like smart caveman. Cut all filler, keep technic
 - Pattern: [thing] [action] [reason]. [next step].`
 
 export default function (pi: ExtensionAPI) {
-  pi.on("before_agent_start", async (event) => {
-    return { systemPrompt: `${event.systemPrompt}\n\n${CAVEMAN_PROMPT}` }
+  pi.on("before_agent_start", (event) => {
+    event.systemPromptOptions.sections.caveman = CAVEMAN_PROMPT
   })
 }
