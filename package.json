@@ -9,7 +9,7 @@
     "check:tsc": "tsc --noEmit",
     "fix": "bun run fix:lint && bun run fix:format && bun test",
     "fix:format": "oxfmt",
-    "fix:lint": "oxlint --fix",
+    "fix:lint": "oxlint --fix --format=agent",
     "test": "bun test --only-failures"
   },
   "dependencies": {
