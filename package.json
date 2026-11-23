@@ -3,13 +3,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "bun run check:tsc && bun run check:format && bun run check:lint",
+    "check": "bun run check:tsc && bun run check:format && bun run check:lint && bun test",
     "check:format": "oxfmt --check",
     "check:lint": "oxlint",
     "check:tsc": "tsc --noEmit",
-    "fix": "bun run check:tsc && bun run fix:lint && bun run fix:format",
+    "fix": "bun run fix:lint && bun run fix:format && bun test",
     "fix:format": "oxfmt",
-    "fix:lint": "oxlint --fix"
+    "fix:lint": "oxlint --fix",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@tsconfig/bun": "^1.0.12",
+    "@types/bun": "^1.4.5"
   },
   "devDependencies": {
     "@earendil-works/pi-ai": "^1.5.0",
@@ -18,9 +23,5 @@
     "oxfmt": "^0.71.0",
     "oxlint": "^1.86.0",
     "typescript": "^7.0.2"
-  },
-  "dependencies": {
-    "@tsconfig/bun": "^1.0.12",
-    "@types/bun": "^1.4.5"
   }
 }
