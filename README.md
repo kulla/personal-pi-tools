@@ -50,7 +50,7 @@ Adds a concise, technical caveman-style prompt to every agent turn.
 
 ### `/grill-me`
 
-Stress-tests a plan, decision, or idea with dependency-aware rounds of questions and recommended answers. Researches facts with available tools; ends when in-scope decisions are resolved or deferred, and waits for confirmation before acting.
+Stress-tests a plan, decision, or idea within agreed scope using dependency-aware rounds, challenges to assumptions, and recommendations with trade-offs. Researches facts with available tools, surfaces unknowns, and revisits decisions when answers change. Ends when in-scope decisions are resolved or explicitly deferred; implementation requires both confirmation of shared understanding and user authorization.
 
 ### `/code-simplification`
 
