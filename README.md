@@ -50,7 +50,7 @@ Adds a concise, technical caveman-style prompt to every agent turn.
 
 ### `/grill-me`
 
-Grill the user one question at a time to stress-test a plan, decision, or idea.
+Stress-tests a plan, decision, or idea with dependency-aware rounds of questions and recommended answers. Researches facts with available tools; ends when in-scope decisions are resolved or deferred, and waits for confirmation before acting.
 
 ### `/code-simplification`
 
