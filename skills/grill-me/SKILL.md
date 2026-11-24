@@ -1,11 +1,11 @@
 ---
 name: grill-me
-description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any /grill-me trigger phrase.
+description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking.
 ---
 
 # Grill Me
 
-Interview the user relentlessly about every aspect of this until we reach a shared understanding. Walk down each branch of the decision tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer. Ask up to 5 questions at a time.
+Interview the user relentlessly about every aspect of this until we reach a shared understanding. Walk down each branch of the decision tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer. Ask up to 10 questions at a time.
 
 If a fact can be found by exploring the environment (filesystem, tools, etc.), look it up rather than asking the user. The decisions, though, are theirs — put each one to them and wait for their answer.
 
