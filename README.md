@@ -50,15 +50,15 @@ Adds a concise, technical caveman-style prompt to every agent turn.
 
 ### `/grill-me`
 
-Stress-tests a plan, decision, or idea within agreed scope using dependency-aware rounds, challenges to assumptions, and recommendations with trade-offs. Researches facts with available tools, surfaces unknowns, and revisits decisions when answers change. Ends when in-scope decisions are resolved or explicitly deferred; implementation requires both confirmation of shared understanding and user authorization.
+Stress-tests plans and decisions with focused questions, research, and trade-off analysis.
 
 ### `/code-simplification`
 
-Simplifies code for clarity while preserving exact behavior.
+Clarifies code while preserving behavior.
 
 ### `/skill:ponytail`
 
-Builds the smallest correct solution by reusing existing code, preferring standard libraries and native features, and avoiding unnecessary abstractions and dependencies without sacrificing safety. Based on [DietrichGebert's Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md).
+Finds the smallest safe solution by reusing existing code and avoiding needless complexity. Based on [DietrichGebert's Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md).
 
 ## Sources
 
