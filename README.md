@@ -58,7 +58,7 @@ Clarifies code while preserving behavior.
 
 ### `/skill:ponytail`
 
-Finds the smallest safe solution by reusing existing code and avoiding needless complexity. Based on [DietrichGebert's Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md).
+Finds the smallest safe solution by reusing existing code and avoiding needless complexity.
 
 ## Sources
 
