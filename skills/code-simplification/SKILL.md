@@ -1,6 +1,6 @@
 ---
 name: code-simplification
-description: Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. Use when asked to simplify code, clean up code, refactor for clarity, improve readability, or review recently modified code for unnecessary complexity.
+description: Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. Use when asked to simplify code, clean up code, refactor for clarity, improve readability, or review recently modified code.
 ---
 
 # Code Simplification
@@ -15,7 +15,7 @@ Change how code expresses its behavior, not what it does. Preserve outputs, side
 
 ### 2. Apply Project Standards
 
-Read project instructions (such as `AGENTS.md` or `CLAUDE.md`) and neighboring code before editing. Match established conventions for imports, functions, types, components, naming, and error handling. Do not impose another project's rules.
+Read project instructions (such as `AGENTS.md` or `CLAUDE.md`), necessary skills for the particular domain and neighboring code before editing. Match established conventions for imports, functions, types, components, naming, and error handling. Do not impose another project's rules.
 
 ### 3. Enhance Clarity
 
