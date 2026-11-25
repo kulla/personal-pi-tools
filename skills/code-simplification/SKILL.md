@@ -9,9 +9,17 @@ Simplify code for clarity, consistency, and maintainability without changing beh
 
 ## Refinement Principles
 
-### 1. Preserve Functionality
+### 1. Preserve Behavior Exactly
 
-Change how code expresses its behavior, not what it does. Preserve outputs, side effects, error handling, and edge cases. If a change might alter behavior, do not treat it as simplification.
+Don't change what the code does — only how it expresses it. All inputs, outputs, side effects, error behavior, and edge cases must remain identical. If you're not sure a simplification preserves behavior, don't make it.
+
+```
+ASK BEFORE EVERY CHANGE:
+→ Does this produce the same output for every input?
+→ Does this maintain the same error behavior?
+→ Does this preserve the same side effects and ordering?
+→ Do all existing tests still pass without modification?
+```
 
 ### 2. Apply Project Standards
 
@@ -29,7 +37,7 @@ Read project instructions (such as `AGENTS.md` or `CLAUDE.md`), necessary skills
 
 ### 4. Maintain Balance
 
-Do not simplify in ways that make code harder to read, debug, or extend. Keep helpful abstractions and separate concerns. Fewer lines do not necessarily mean simpler code.
+Do not simplify in ways that make code harder to read, debug, or extend. Keep helpful abstractions and separate concerns. Fewer lines do not necessarily mean simpler code. Explicit code is better than compact code when the compact version requires a mental pause to parse.
 
 ### 5. Focus Scope
 
