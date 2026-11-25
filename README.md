@@ -64,5 +64,5 @@ Finds the smallest safe solution by reusing existing code and avoiding needless 
 
 - `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
 - `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
-- `/code-simplification`: [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills/blob/main/skills/code-simplification/SKILL.md)
+- `/code-simplification`: [getsentry/skills](https://github.com/getsentry/skills/blob/main/skills/code-simplifier/SKILL.md)
 - `/skill:ponytail`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT
