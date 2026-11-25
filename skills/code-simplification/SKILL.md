@@ -5,8 +5,6 @@ description: Simplifies and refines code for clarity, consistency, and maintaina
 
 # Code Simplification
 
-Adapted from [Sentry's code-simplifier skill](https://github.com/getsentry/skills/blob/main/skills/code-simplifier/SKILL.md), based on [Anthropic's code-simplifier agent](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md).
-
 Simplify code for clarity, consistency, and maintainability without changing behavior. Prefer readable, explicit code over compact solutions that take more effort to understand.
 
 ## Refinement Principles
