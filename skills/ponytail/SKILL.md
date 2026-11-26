@@ -1,8 +1,9 @@
 ---
 name: ponytail
 description: >
-  Load for every implementation, refactoring, or code review task.
-  Prefer deletion, reuse, standard libraries, and the smallest correct solution.
+  Identifies simpler implementations through unnecessary code removal, reuse of
+  existing code and standard libraries, and focused changes that preserve requirements.
+  Use for feature implementation, bug fixes, refactoring, and code reviews.
 license: MIT
 ---
 
