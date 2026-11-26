@@ -1,3 +1,3 @@
 - Personal pi tools package: make small, focused changes; avoid generic scaffolding.
-- Keep colocated `README.md` synchronized with implementation changes.
+- Keep `README.md` files small, especially root-level `README.md`; change their text only when implementation changes, keeping colocated docs synchronized.
 - Validate all code changes with `bun fix`
