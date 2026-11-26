@@ -1,9 +1,8 @@
 ---
 name: ponytail
 description: >
-  Load for every implementation, refactoring, or code review task in full mode
-  by default. Prefer reuse, standard libraries, and the smallest correct solution.
-argument-hint: "[lite|full|ultra]"
+  Load for every implementation, refactoring, or code review task.
+  Prefer deletion, reuse, standard libraries, and the smallest correct solution.
 license: MIT
 ---
 
@@ -16,8 +15,7 @@ code is the code never written.
 ## Persistence
 
 ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if
-unsure. Off only: "stop ponytail" / "normal mode". Default: **full**.
-Switch: `/ponytail lite|full|ultra`.
+unsure. Off only: "stop ponytail" / "normal mode".
 
 ## The ladder
 
@@ -47,7 +45,7 @@ every sibling caller still broken. Fix it once, where all callers route through.
 
 - No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.
 - No boilerplate, no scaffolding "for later", later can scaffold for itself.
-- Deletion over addition. Boring over clever, clever is what someone decodes at 3am.
+- YAGNI first: delete before adding. Challenge speculative requirements with the smallest viable alternative. Boring over clever, clever is what someone decodes at 3am.
 - Fewest files possible. Shortest working diff wins — but only once you understand the problem. The smallest change in the wrong place isn't lazy, it's a second bug.
 - Complex request? Ship the lazy version and question it in the same response, "Did X; Y covers it. Need full X? Say so." Never stall on an answer you can default.
 - Two stdlib options, same size? Take the one that's correct on edge cases. Lazy means writing less code, not picking the flimsier algorithm.
@@ -63,20 +61,6 @@ explicitly asked for (a report, a walkthrough, per-phase notes) is not debt,
 give it in full, the rule is only against unrequested prose.
 
 Pattern: `[code] → skipped: [X], add when [Y].`
-
-## Intensity
-
-| Level     | What change                                                                                                                 |
-| --------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **lite**  | Build what's asked, but name the lazier alternative in one line. User picks.                                                |
-| **full**  | The ladder enforced. Stdlib and native first. Shortest diff, shortest explanation. Default.                                 |
-| **ultra** | YAGNI extremist. Deletion before addition. Ship the one-liner and challenge the rest of the requirement in the same breath. |
-
-Example: "Add a cache for these API responses."
-
-- lite: "Done, cache added. FYI: `functools.lru_cache` covers this in one line if you'd rather not own a cache class."
-- full: "`@lru_cache(maxsize=1000)` on the fetch function. Skipped custom cache class, add when lru_cache measurably falls short."
-- ultra: "No cache until a profiler says so. When it does: `@lru_cache`. A hand-rolled TTL cache class is a bug farm with a hit rate."
 
 ## When NOT to be lazy
 
@@ -105,7 +89,6 @@ test, YAGNI applies to tests too.
 ## Boundaries
 
 Ponytail governs what you build, not how you talk (pair with Caveman for
-terse prose). "stop ponytail" / "normal mode": revert. Level persists until
-changed or session end.
+terse prose). "stop ponytail" / "normal mode": revert.
 
 The shortest path to done is the right path.
