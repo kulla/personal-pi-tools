@@ -60,9 +60,14 @@ Clarifies code while preserving behavior.
 
 Finds the smallest safe solution by reusing existing code and avoiding needless complexity.
 
+### `/skill:typescript-best-practices`
+
+Applies TypeScript type modeling, narrowing, and boundary validation practices.
+
 ## Sources
 
 - `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
 - `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
 - `/skill:ponytail`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT
+- `/skill:typescript-best-practices`: [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/typescript-best-practices/SKILL.md) — MIT
 - `/code-simplification`: [getsentry/skills](https://github.com/getsentry/skills/blob/main/skills/code-simplifier/SKILL.md) — based on [Anthropic's code-simplifier agent](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md)
