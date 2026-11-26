@@ -47,8 +47,8 @@ Refine recently modified code or code touched in the current session unless aske
 
 1. Identify code in scope and understand its behavior and constraints.
 2. Look for opportunities to improve clarity and consistency.
-3. Apply the smallest useful changes following project conventions.
-4. Verify behavior remains unchanged with relevant tests or checks.
+3. For review requests, report concrete findings without editing unless asked. For implementation requests, apply the smallest useful changes following project conventions.
+4. For changes, verify behavior remains unchanged with relevant tests and type checks. Report any checks not run or behavior left unverified.
 5. Keep changes only if the result is easier to understand. Explain significant changes when needed.
 
 ## Examples
@@ -60,27 +60,29 @@ Refine recently modified code or code touched in the current session unless aske
 const status = isLoading ? "loading" : hasError ? "error" : isComplete ? "complete" : "idle"
 
 // After
-function getStatus(isLoading: boolean, hasError: boolean, isComplete: boolean): string {
+function getStatus() {
   if (isLoading) return "loading"
   if (hasError) return "error"
   if (isComplete) return "complete"
   return "idle"
 }
+
+const status = getStatus()
 ```
 
-### Overly compact → clear steps
+Keep this helper in the original scope to preserve conditional reads. Leave its return type inferred to preserve the string-literal union.
+
+### Dense condition → named intent
 
 ```typescript
 // Before
-const result = arr
-  .filter((x) => x > 0)
-  .map((x) => x * 2)
-  .reduce((a, b) => a + b, 0)
+const result = orders.filter((order) => order.paid && !order.cancelled && order.shippedAt === null)
 
 // After
-const positiveNumbers = arr.filter((x) => x > 0)
-const doubled = positiveNumbers.map((x) => x * 2)
-const sum = doubled.reduce((a, b) => a + b, 0)
+const result = orders.filter((order) => {
+  const readyToShip = order.paid && !order.cancelled && order.shippedAt === null
+  return readyToShip
+})
 ```
 
 ### Redundant abstraction → direct check
