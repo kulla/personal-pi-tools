@@ -1,6 +1,7 @@
 ---
 name: grill-me
 description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking.
+license: MIT
 ---
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it. Use the user's stated goal and boundaries as scope. If unclear, resolve scope before detailed design questions; do not expand into speculative branches without agreement.
