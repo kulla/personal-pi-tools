@@ -15,26 +15,18 @@ Judge each test against two imagined edits:
 
 Keep a test that catches the first edit and survives the second. Rewrite or delete the rest. Drive the code through its public interface with a concrete input, and derive the expected value from the requirement. What an external service receives is behavior. A call to an internal helper is not. Pair "this never happens" with a case where it does happen. Assert the error type that callers branch on, not the message.
 
-## Single responsibility
+## Other principles
 
-Test one logical behavior or scenario. Multiple assertions are fine when they verify that behavior.
-
-## Isolation
-
-Avoid dependencies on other tests, shared mutable state, or execution order.
-
-## Arrange–Act–Assert (AAA)
-
-Prepare inputs, execute behavior, then verify results.
-
-## Readability
-
-Use descriptive names, explicit inputs, and clear assertions. Tests should read as executable documentation.
-
-## Minimal mocking
-
-Mock external dependencies only when needed; excessive mocking couples tests to implementation and can hide failures.
-
-## Simplicity
-
-Avoid unnecessary abstractions, branches, and complex calculations in tests. Expected results should be easy to verify.
+- **Scope:** Test one logical behavior per test. Multiple assertions
+  are acceptable when verifying the same behavior.
+- **Isolation:** Never depend on shared mutable state, other tests,
+  or execution order.
+- **Mocking:** Prefer real dependencies when practical. Mock only
+  when necessary for isolation or determinism.
+- **Structure:** Follow Arrange–Act–Assert. Separate phases with
+  blank lines rather than redundant comments.
+- **Readability:** Name tests by scenario and expected behavior.
+  Keep relevant inputs and expected outputs explicit.
+- **Simplicity:** Prefer duplication over unnecessary abstractions.
+  Avoid branching, complex calculations, and reproducing production
+  logic to derive expected results.
