@@ -17,6 +17,10 @@ Judge each test against two imagined edits:
 
 Keep a test that catches the first edit and survives the second. Rewrite or delete the rest. Drive the code through its public interface with a concrete input, and derive the expected value from the requirement. What an external service receives is behavior. A call to an internal helper is not. Pair "this never happens" with a case where it does happen. Assert the error type that callers branch on, not the message.
 
+## Test Behavior Where It Belongs
+
+A unit test should assert only behavior owned by the function or module under test. Do not repeat tests for a dependency's behavior just because the unit calls it. Delete redundant tests; move unique cases to the owning module's tests or merge them with existing cases there. Keep unit tests concise. Integration and end-to-end tests may verify behavior across modules.
+
 ## Other principles
 
 - **Scope:** Test one logical behavior per test. Multiple assertions
