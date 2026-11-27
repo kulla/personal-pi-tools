@@ -3,7 +3,8 @@ name: minimal-implementation
 description: >
   Identifies simpler implementations through unnecessary code removal, reuse of
   existing code and standard libraries, and focused changes that preserve requirements.
-  Use for feature implementation, bug fixes, refactoring, and code reviews.
+  Use for feature implementation, bug fixes, refactoring, and code reviews,
+  especially when abstractions or mutable state make code hard to trace.
 license: MIT
 ---
 
@@ -27,11 +28,13 @@ correct.
 
 ## Subtract before building
 
-In the affected area, remove dead code, redundant checks, and obsolete
-references before adding or reshaping code. Cut unnecessary surface before
-polishing it. Design for observed usage, not speculative edge cases; don't
-add validators or guards beyond what the requirements and trust boundaries
-need. Leave the design simpler without expanding its surface unnecessarily.
+In the affected area, remove dead code and redundant checks before adding or
+reshaping code. Delete references with no novel content instead of leaving
+stubs; trim redundant prompt instructions and excessive templates. Cut
+unnecessary surface before polishing it. Design for observed usage, not
+speculative edge cases; don't add parsers, validators, or guards beyond what
+the requirements and trust boundaries need. Leave the design simpler without
+expanding its surface unnecessarily.
 
 ## The ladder
 
@@ -50,11 +53,14 @@ prefer the simpler one and move on. Fewest lines or files is not the goal.
 
 ## Minimize reader load
 
-Make it easy to answer where a value comes from and what can change it.
-Collapse one-caller wrappers and pass-through layers that add no useful
-boundary. Prefer returns over mutations and local state over wider mutable
-state; derive values instead of keeping copies in sync. Establish an
-invariant once at its boundary rather than rechecking it in every consumer.
+Reduce both layers a reader must trace and hidden or mutable state they
+must hold in mind. Inline one-caller wrappers, pass-through methods, and
+adapters without a second implementation when they add no useful boundary.
+Prefer returns over mutations and locals over fields, fields over module
+state, module state over globals; derive values instead of keeping copies in
+sync. Establish an invariant once at its boundary rather than rechecking it
+in every consumer. If a new reader cannot quickly answer where a value comes
+from and what can change it, cut layers or state.
 
 ## Keep scope honest
 
