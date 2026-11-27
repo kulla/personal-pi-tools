@@ -10,11 +10,11 @@ Make illegal states unrepresentable, parse external data at boundaries, and deri
 
 ## Discriminated unions
 
-Model variants with a `kind` literal discriminant so impossible states can't be represented. No optional-field bags.
+Model variants with a `kind` or `type` literal discriminant so impossible states can't be represented. No optional-field bags.
 
 ## Branded types
 
-Brand primitives with `& { readonly __brand: "X" }` so they can't be mixed up. Validate once at the boundary. A brand comes from a verifying type guard (`input is AgentId`), never from `as`.
+Brand primitives with `& { readonly __brand: "X" }` or `Branded<...>` so they can't be mixed up. Validate once at the boundary. A brand comes from a verifying type guard (`input is AgentId`), never from `as`.
 
 ## Constructive modeling
 
@@ -64,12 +64,6 @@ Reach for `Pick`/`Omit`/`Parameters`/`ReturnType`/`Awaited`/`typeof` before decl
 
 Pass objects, not positional, so argument order is self-documenting. Skip on hot paths (per-frame render, tokenizers, parsers).
 
-## Real tests
-
-Don't mock what you can run. Prefer the framework's real test primitives with leak/disposable checks, and verify UI in a running build. Mock only what you can't run locally.
-
 ## Structured telemetry
 
 Prefer structured logger diagnostics with enough context to debug from an id. No `console.log` in shipped code.
-
-Examples: `references/patterns.md`.
