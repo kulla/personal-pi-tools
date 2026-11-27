@@ -2,7 +2,7 @@
 
 **Implementation:** `extensions/caveman/index.ts`
 
-Adds concise, technical caveman-style instructions as a structured prompt section on every agent turn, without replacing Pi's system prompt. Explicit forced system prompts override structured sections.
+Adds technical caveman-style instructions as a structured prompt section on every agent turn. Explanations prioritize clarity over brevity and use pseudocode. Does not replace Pi's system prompt; explicit forced system prompts override structured sections.
 
 ## Source
 

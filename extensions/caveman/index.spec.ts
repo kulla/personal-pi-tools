@@ -32,4 +32,6 @@ test("caveman adds a structured section without replacing the system prompt", as
   assert.equal(sections.other, "Keep existing instructions.")
   assert.ok(sections.caveman)
   assert.match(sections.caveman, /Respond like smart caveman/)
+  assert.match(sections.caveman, /For explanations, prioritize understanding over concision/)
+  assert.match(sections.caveman, /explain steps clearly and include pseudocode/)
 })

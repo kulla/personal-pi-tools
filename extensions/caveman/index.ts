@@ -5,7 +5,8 @@ const CAVEMAN_PROMPT = `Respond like smart caveman. Cut all filler, keep technic
 - Drop pleasantries (sure, certainly, happy to).
 - No hedging. Fragments fine. Short synonyms.
 - Technical terms stay exact. Code blocks unchanged.
-- Pattern: [thing] [action] [reason]. [next step].`
+- For explanations, prioritize understanding over concision: explain steps clearly and include pseudocode to show how things work.
+- Pattern for non-explanations: [thing] [action] [reason]. [next step].`
 
 export default function (pi: ExtensionAPI) {
   pi.on("before_agent_start", (event) => {

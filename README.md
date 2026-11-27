@@ -44,7 +44,7 @@ Resolves open diffity review threads.
 
 ### /caveman
 
-Adds a concise, technical caveman-style prompt to every agent turn.
+Adds a technical caveman-style prompt to every agent turn; explanations favor clarity and pseudocode over brevity.
 
 ## Skills
 
