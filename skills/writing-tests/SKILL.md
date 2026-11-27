@@ -4,7 +4,9 @@ description: Apply when writing, reviewing or changing unit, integration, and en
 license: MIT
 ---
 
-# Test Behavior, Not Implementation
+# Writing Tests
+
+## Test Behavior, Not Implementation
 
 A test is a claim about what users of the code can observe through its interface: return values, errors, state they can read back, and effects on outside systems. Private helpers, internal call order, and intermediate data are implementation.
 
