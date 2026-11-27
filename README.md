@@ -56,7 +56,7 @@ Stress-tests plans and decisions with focused questions, research, and trade-off
 
 Clarifies code while preserving behavior.
 
-### `/skill:ponytail`
+### `/skill:minimal-implementation`
 
 Finds the smallest safe solution by reusing existing code and avoiding needless complexity.
 
@@ -76,7 +76,7 @@ Writes unit, integration, and end-to-end tests that verify observable behavior r
 
 - `/grill-me`: [mattpocock/skills - /grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md) — MIT
 - `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
-- `/skill:ponytail`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT; also incorporates:
+- `/skill:minimal-implementation`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT; also incorporates:
   - [Subtract Before You Add](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-subtract-before-you-add/SKILL.md)
   - [Laziness Protocol](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-laziness-protocol/SKILL.md)
   - [Minimize Reader Load](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-minimize-reader-load/SKILL.md)
