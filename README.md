@@ -78,6 +78,13 @@ Writes unit, integration, and end-to-end tests that verify observable behavior r
 - `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
 - `/skill:ponytail`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT
 - `/skill:typescript-best-practices`: [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/typescript-best-practices/SKILL.md) — MIT
-- `/skill:design-robust-systems`: [cursor/plugins principle skills](https://github.com/cursor/plugins/tree/main/pstack/skills) — MIT
+- `/skill:design-robust-systems`: [cursor/plugins](https://github.com/cursor/plugins/tree/main/pstack/skills) — MIT; combines:
+  - [Foundational Thinking](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-foundational-thinking/SKILL.md)
+  - [Model the Domain](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-model-the-domain/SKILL.md)
+  - [Type System Discipline](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-type-system-discipline/SKILL.md)
+  - [Boundary Discipline](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-boundary-discipline/SKILL.md)
+  - [Redesign From First Principles](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-redesign-from-first-principles/SKILL.md)
+  - [Separate Before Serializing Shared State](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-separate-before-serializing-shared-state/SKILL.md)
+  - [Make Operations Idempotent](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-make-operations-idempotent/SKILL.md)
 - `/skill:writing-tests` (Test Behavior, Not Implementation): [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-test-behavior-not-implementation/SKILL.md) — MIT
 - `/code-simplification`: [getsentry/skills](https://github.com/getsentry/skills/blob/main/skills/code-simplifier/SKILL.md) — based on [Anthropic's code-simplifier agent](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md)
