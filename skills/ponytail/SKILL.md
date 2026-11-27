@@ -25,6 +25,14 @@ relevant callers. Fix the defect where the violated invariant belongs; don't
 assume a guard in shared code is always right. Verify other callers remain
 correct.
 
+## Subtract before building
+
+In the affected area, remove dead code, redundant checks, and obsolete
+references before adding or reshaping code. Cut unnecessary surface before
+polishing it. Design for observed usage, not speculative edge cases; don't
+add validators or guards beyond what the requirements and trust boundaries
+need. Leave the design simpler without expanding its surface unnecessarily.
+
 ## The ladder
 
 Stop at the first rung that meets required behavior, security, accessibility,
@@ -40,12 +48,21 @@ compatibility, and performance without awkward adaptation:
 The ladder is a reflex, not a research project. Among suitable solutions,
 prefer the simpler one and move on. Fewest lines or files is not the goal.
 
+## Minimize reader load
+
+Make it easy to answer where a value comes from and what can change it.
+Collapse one-caller wrappers and pass-through layers that add no useful
+boundary. Prefer returns over mutations and local state over wider mutable
+state; derive values instead of keeping copies in sync. Establish an
+invariant once at its boundary rather than rechecking it in every consumer.
+
 ## Keep scope honest
 
 - Meet explicit requirements. Suggest scope reductions; don't silently apply them or make the user ask twice.
 - Ask when ambiguity affects correctness, safety, or irreversible work. Otherwise state a reasonable assumption and proceed.
 - No speculative abstractions, configuration, or scaffolding. Add them only for concrete current needs, including existing framework contracts.
-- Keep changes focused. Avoid unrelated cleanup and new general-purpose machinery for a local problem.
+- Keep changes focused. Make the smallest change that solves the problem; avoid unrelated cleanup and new general-purpose machinery for a local problem.
+- Consolidate repeated decisions in one source of truth. Pass the result as a simple value rather than repeating the decision across layers.
 - Never simplify away validation at trust boundaries, error handling that prevents data loss, security measures, or accessibility requirements.
 - Keep configuration or calibration required by real operating conditions.
 - Document deliberate trade-offs with meaningful limits in ordinary comments: why acceptable here, known ceiling, and upgrade path only when useful and known. Don't narrate obvious code.
