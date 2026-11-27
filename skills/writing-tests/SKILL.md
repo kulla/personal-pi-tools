@@ -1,31 +1,16 @@
 ---
 name: writing-tests
-description: Write or review unit, integration, and end-to-end tests. Use when adding coverage, fixing a bug, choosing a test level, or improving brittle tests. Assert observable behavior rather than implementation details.
+description: Apply when writing, reviewing or changing unit, integration, and end-to-end tests. Assert observable behavior rather than implementation details.
 license: MIT
 ---
 
-# Writing Tests
+# Test Behavior, Not Implementation
 
-Test behavior, not implementation. A test should fail when a user-visible contract breaks and keep passing when internals change without changing that contract.
+A test is a claim about what users of the code can observe through its interface: return values, errors, state they can read back, and effects on outside systems. Private helpers, internal call order, and intermediate data are implementation.
 
-## Choose the boundary
+Judge each test against two imagined edits:
 
-- **Unit:** Exercise a small public contract with concrete inputs and outputs. Use for domain rules and edge cases; avoid testing private helpers directly.
-- **Integration:** Exercise real interactions between components, such as application code and a database. Mock only external systems that cannot be used reliably in the test environment.
-- **End-to-end:** Exercise a critical user journey through the deployed interface. Check outcomes a user can observe, not internal calls or markup unrelated to the behavior.
+- **Break the behavior** (a wrong value, a skipped or doubled effect). If the test still passes, it proves nothing. The usual causes are a loose assertion, an expected value computed by the code under test, and an assertion on data the test built itself.
+- **Change the internals** and keep every observable result. If the test fails, it is pinned to the implementation.
 
-Use the narrowest level that can prove the requirement; add broader tests when the interaction between components is the risk. Prefer a few meaningful cases over repeating the same assertion at every level.
-
-## Write the claim
-
-- Start with a concrete requirement and an input that could expose a defect. Derive expected results from the requirement, never from the code under test.
-- Drive code through the interface its consumers use. Assert returned values, observable errors, read-back state, and external effects. An external service receiving a request is behavior; an internal helper being called is not.
-- Cover meaningful success, failure, and boundary cases. Pair a claim that something never happens with a case where it should happen. Assert error types or codes callers use, not incidental wording.
-- For a bug fix, make a regression test fail on the faulty behavior before applying the fix when feasible.
-
-## Keep tests trustworthy
-
-- Isolate each test's state. Use deterministic inputs, controlled time, and explicit cleanup; avoid sleeps and dependence on test order.
-- Mock at external boundaries, not between units whose integration matters. Avoid assertions on mock call order unless that order is part of the contract.
-- Ask two questions: If observable behavior breaks, does this test fail? If internals change but behavior stays correct, does this test pass? Rewrite or remove tests that fail either check.
-- Run the relevant tests and inspect failures. A passing build, snapshot, or assertion on data created by the test itself does not prove the behavior.
+Keep a test that catches the first edit and survives the second. Rewrite or delete the rest. Drive the code through its public interface with a concrete input, and derive the expected value from the requirement. What an external service receives is behavior. A call to an internal helper is not. Pair "this never happens" with a case where it does happen. Assert the error type that callers branch on, not the message.
