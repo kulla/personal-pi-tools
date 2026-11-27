@@ -64,6 +64,10 @@ Finds the smallest safe solution by reusing existing code and avoiding needless 
 
 Applies TypeScript type modeling, narrowing, and boundary validation practices.
 
+### `/skill:design-robust-systems`
+
+Designs data models, boundaries, and state-changing operations for new or evolving systems.
+
 ### `/skill:writing-tests`
 
 Writes unit, integration, and end-to-end tests that verify observable behavior rather than implementation details.
@@ -74,5 +78,6 @@ Writes unit, integration, and end-to-end tests that verify observable behavior r
 - `/caveman`: [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro) — MIT
 - `/skill:ponytail`: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md) — MIT
 - `/skill:typescript-best-practices`: [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/typescript-best-practices/SKILL.md) — MIT
+- `/skill:design-robust-systems`: [cursor/plugins principle skills](https://github.com/cursor/plugins/tree/main/pstack/skills) — MIT
 - `/skill:writing-tests` (Test Behavior, Not Implementation): [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-test-behavior-not-implementation/SKILL.md) — MIT
 - `/code-simplification`: [getsentry/skills](https://github.com/getsentry/skills/blob/main/skills/code-simplifier/SKILL.md) — based on [Anthropic's code-simplifier agent](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md)
