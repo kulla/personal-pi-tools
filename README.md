@@ -68,6 +68,10 @@ Applies TypeScript type modeling, narrowing, and boundary validation practices.
 
 Designs data models, boundaries, and state-changing operations for new or evolving systems.
 
+### `/skill:design-user-experience`
+
+Prioritizes user experience and compares prototypes before committing to novel designs.
+
 ### `/skill:writing-tests`
 
 Writes unit, integration, and end-to-end tests that verify observable behavior rather than implementation details.
@@ -89,5 +93,8 @@ Writes unit, integration, and end-to-end tests that verify observable behavior r
   - [Redesign From First Principles](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-redesign-from-first-principles/SKILL.md)
   - [Separate Before Serializing Shared State](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-separate-before-serializing-shared-state/SKILL.md)
   - [Make Operations Idempotent](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-make-operations-idempotent/SKILL.md)
+- `/skill:design-user-experience`: [cursor/plugins](https://github.com/cursor/plugins/tree/main/pstack/skills) — MIT; combines:
+  - [Experience First](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-experience-first/SKILL.md)
+  - [Exhaust the Design Space](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-exhaust-the-design-space/SKILL.md)
 - `/skill:writing-tests` (Test Behavior, Not Implementation): [cursor/plugins](https://github.com/cursor/plugins/blob/main/pstack/skills/principle-test-behavior-not-implementation/SKILL.md) — MIT
 - `/code-simplification`: [getsentry/skills](https://github.com/getsentry/skills/blob/main/skills/code-simplifier/SKILL.md) — based on [Anthropic's code-simplifier agent](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md)
